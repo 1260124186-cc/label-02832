@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  jd-mall-homepage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      platforms:
+        - linux/amd64
+        - linux/arm64
+    image: jd-mall-homepage:latest
+    container_name: jd-mall-homepage
+    ports:
+      - "8081:8081"
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - jd-network
+    labels:
+      - "app.name=jd-mall-homepage"
+      - "app.description=京东商城首页Vue实现"
+      - "app.version=1.0.0"
+
+networks:
+  jd-network:
+    driver: bridge

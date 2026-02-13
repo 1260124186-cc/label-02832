@@ -1,0 +1,295 @@
+// ============================================
+// 通用样式类
+// ============================================
+
+@use './variables.scss' as *;
+
+// 容器
+.container {
+  width: 100%;
+  max-width: $container-width;
+  margin: 0 auto;
+  padding: 0 $container-padding;
+}
+
+.container-fluid {
+  width: 100%;
+  padding: 0 $container-padding;
+}
+
+// 区块样式
+.section {
+  margin-bottom: $spacing-lg;
+  
+  &-header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 2px solid $jd-red;
+    
+    .title {
+      font-size: $font-size-lg;
+      font-weight: $font-weight-bold;
+      color: $color-text-primary;
+      
+      .icon {
+        margin-right: $spacing-sm;
+        color: $jd-red;
+      }
+    }
+    
+    .more {
+      font-size: $font-size-sm;
+      color: $color-text-secondary;
+      
+      &:hover {
+        color: $jd-red;
+      }
+    }
+  }
+}
+
+// 卡片样式
+.card {
+  @include card-style;
+  padding: $spacing-md;
+  
+  &-header {
+    @include flex-between;
+    margin-bottom: $spacing-md;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $border-light;
+  }
+  
+  &-body {
+    // 默认无样式
+  }
+  
+  &-footer {
+    margin-top: $spacing-md;
+    padding-top: $spacing-sm;
+    border-top: 1px solid $border-light;
+  }
+}
+
+// 按钮样式
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-sm $spacing-md;
+  font-size: $font-size-base;
+  font-weight: $font-weight-medium;
+  border-radius: $radius-md;
+  transition: all $transition-fast;
+  cursor: pointer;
+  
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  
+  // 主要按钮
+  &-primary {
+    background: $jd-red;
+    color: $color-white;
+    
+    &:hover:not(:disabled) {
+      background: $jd-red-dark;
+    }
+    
+    &:active:not(:disabled) {
+      transform: scale(0.98);
+    }
+  }
+  
+  // 次要按钮
+  &-secondary {
+    background: $bg-white;
+    color: $color-text-primary;
+    border: 1px solid $border-medium;
+    
+    &:hover:not(:disabled) {
+      border-color: $jd-red;
+      color: $jd-red;
+    }
+  }
+  
+  // 文字按钮
+  &-text {
+    background: transparent;
+    color: $jd-red;
+    padding: $spacing-xs $spacing-sm;
+    
+    &:hover:not(:disabled) {
+      background: rgba($jd-red, 0.1);
+    }
+  }
+  
+  // 按钮尺寸
+  &-sm {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+  }
+  
+  &-lg {
+    padding: $spacing-md $spacing-lg;
+    font-size: $font-size-md;
+  }
+  
+  // Loading状态
+  &.is-loading {
+    pointer-events: none;
+    
+    .btn-text {
+      opacity: 0;
+    }
+    
+    &::after {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      border: 2px solid transparent;
+      border-top-color: currentColor;
+      border-radius: 50%;
+      animation: btn-spin 0.6s linear infinite;
+    }
+  }
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// 标签样式
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px $spacing-sm;
+  font-size: $font-size-xs;
+  border-radius: $radius-sm;
+  
+  &-red {
+    background: rgba($jd-red, 0.1);
+    color: $jd-red;
+    border: 1px solid $jd-red;
+  }
+  
+  &-orange {
+    background: rgba($jd-orange, 0.1);
+    color: $jd-orange;
+    border: 1px solid $jd-orange;
+  }
+  
+  &-gold {
+    background: linear-gradient(135deg, #ffd700, #ffb700);
+    color: #8b4513;
+  }
+}
+
+// 价格样式
+.price {
+  color: $jd-red;
+  font-weight: $font-weight-bold;
+  
+  &-symbol {
+    font-size: $font-size-sm;
+  }
+  
+  &-integer {
+    font-size: $font-size-xl;
+  }
+  
+  &-decimal {
+    font-size: $font-size-sm;
+  }
+  
+  &-original {
+    color: $color-text-placeholder;
+    font-weight: $font-weight-normal;
+    font-size: $font-size-sm;
+    text-decoration: line-through;
+    margin-left: $spacing-sm;
+  }
+}
+
+// 文字工具类
+.text {
+  &-center { text-align: center; }
+  &-left { text-align: left; }
+  &-right { text-align: right; }
+  
+  &-primary { color: $color-text-primary; }
+  &-secondary { color: $color-text-secondary; }
+  &-placeholder { color: $color-text-placeholder; }
+  &-red { color: $jd-red; }
+  &-orange { color: $jd-orange; }
+  
+  &-ellipsis { @include ellipsis(1); }
+  &-ellipsis-2 { @include ellipsis(2); }
+  &-ellipsis-3 { @include ellipsis(3); }
+}
+
+// Flex工具类
+.flex {
+  display: flex;
+  
+  &-center { @include flex-center; }
+  &-between { @include flex-between; }
+  &-wrap { flex-wrap: wrap; }
+  &-column { flex-direction: column; }
+  
+  &-1 { flex: 1; }
+  &-auto { flex: auto; }
+  &-none { flex: none; }
+}
+
+// 间距工具类
+.mt-sm { margin-top: $spacing-sm; }
+.mt-md { margin-top: $spacing-md; }
+.mt-lg { margin-top: $spacing-lg; }
+
+.mb-sm { margin-bottom: $spacing-sm; }
+.mb-md { margin-bottom: $spacing-md; }
+.mb-lg { margin-bottom: $spacing-lg; }
+
+.ml-sm { margin-left: $spacing-sm; }
+.ml-md { margin-left: $spacing-md; }
+
+.mr-sm { margin-right: $spacing-sm; }
+.mr-md { margin-right: $spacing-md; }
+
+.pt-sm { padding-top: $spacing-sm; }
+.pt-md { padding-top: $spacing-md; }
+
+.pb-sm { padding-bottom: $spacing-sm; }
+.pb-md { padding-bottom: $spacing-md; }
+
+.p-sm { padding: $spacing-sm; }
+.p-md { padding: $spacing-md; }
+.p-lg { padding: $spacing-lg; }
+
+// 动画类
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity $transition-normal;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: all $transition-normal;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
