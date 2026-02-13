@@ -1,15 +1,11 @@
-version: '3.8'
-
 services:
-  jd-mall-homepage:
+  # 管理后台前端服务
+  frontend-admin:
     build:
-      context: .
+      context: ./frontend-admin
       dockerfile: Dockerfile
-      platforms:
-        - linux/amd64
-        - linux/arm64
-    image: jd-mall-homepage:latest
-    container_name: jd-mall-homepage
+    image: jd-mall-frontend-admin:latest
+    container_name: jd-mall-frontend-admin
     ports:
       - "8081:8081"
     restart: unless-stopped
@@ -24,8 +20,8 @@ services:
     networks:
       - jd-network
     labels:
-      - "app.name=jd-mall-homepage"
-      - "app.description=京东商城首页Vue实现"
+      - "app.name=jd-mall-frontend-admin"
+      - "app.description=京东商城管理后台前端"
       - "app.version=1.0.0"
 
 networks:
