@@ -8,6 +8,9 @@ import App from './App.vue'
 import router from './router'
 import './assets/styles/index.scss'
 
+// 导入图片懒加载指令
+import LazyImgPlugin from './directives/lazyImg'
+
 const app = createApp(App)
 
 // 注册所有Element Plus图标
@@ -18,5 +21,6 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 app.use(createPinia())
 app.use(router)
 app.use(ElementPlus)
+app.use(LazyImgPlugin) // 注册图片懒加载指令
 
 app.mount('#app')

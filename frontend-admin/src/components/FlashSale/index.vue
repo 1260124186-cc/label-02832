@@ -7,9 +7,9 @@
           <div class="title-area">
             <h2 class="title">
               <el-icon><AlarmClock /></el-icon>
-              限时秒杀
+              {{ config.title }}
             </h2>
-            <p class="subtitle">每日10点/14点/20点开抢</p>
+            <p class="subtitle">{{ config.subtitle }}</p>
           </div>
           
           <!-- 倒计时 -->
@@ -37,9 +37,9 @@
             :key="product.id"
             class="flash-item"
           >
-            <!-- 图片区域 -->
+            <!-- 图片区域 - 使用懒加载 -->
             <div class="item-image">
-              <img :src="product.image" :alt="product.name" class="product-img" />
+              <img v-lazy-img="product.image" :alt="product.name" class="product-img" />
             </div>
             
             <!-- 商品信息区域 -->
@@ -91,12 +91,13 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { AlarmClock, ArrowRight } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
 
-// 导入本地图片
-import airpodsImg from '@/assets/images/products/airpods.webp'
-import dysonHairImg from '@/assets/images/products/daisenchuifengji.webp'
-import sonyHeadphoneImg from '@/assets/images/products/suoni.webp'
-import miBandImg from '@/assets/images/products/xiaomishouhuan.webp'
-import skiiImg from '@/assets/images/products/skii.webp'
+// 从 mock 数据导入
+import { 
+  flashSaleConfig, 
+  flashSaleProducts, 
+  getFlashSaleRemainingTime,
+  formatCountdown 
+} from '@/mock/flashSale'
 
 const countdown = ref({
   hours: '02',
@@ -116,57 +117,16 @@ const handleGrab = (product) => {
   }
 }
 
-const flashProducts = ref([
-  {
-    id: 1,
-    name: 'Apple AirPods Pro 2',
-    price: 1499,
-    originalPrice: 1999,
-    discount: 7.5,
-    progress: 85,
-    image: airpodsImg
-  },
-  {
-    id: 2,
-    name: '戴森吹风机 HD08',
-    price: 2490,
-    originalPrice: 3190,
-    discount: 7.8,
-    progress: 62,
-    image: dysonHairImg
-  },
-  {
-    id: 3,
-    name: '索尼WH-1000XM5',
-    price: 2199,
-    originalPrice: 2999,
-    discount: 7.3,
-    progress: 91,
-    image: sonyHeadphoneImg
-  },
-  {
-    id: 4,
-    name: '小米手环8 Pro',
-    price: 299,
-    originalPrice: 399,
-    discount: 7.5,
-    progress: 45,
-    image: miBandImg
-  },
-  {
-    id: 5,
-    name: 'SK-II神仙水230ml',
-    price: 1190,
-    originalPrice: 1590,
-    discount: 7.5,
-    progress: 78,
-    image: skiiImg
-  }
-])
+// 使用 mock 数据
+const config = ref(flashSaleConfig)
+const flashProducts = ref(flashSaleProducts)
 
 const startCountdown = () => {
-  // 设置结束时间为当前时间后2.5小时
-  let totalSeconds = 2 * 3600 + 30 * 60
+  // 从 mock 数据获取剩余时间
+  let totalSeconds = getFlashSaleRemainingTime()
+  
+  // 初始化倒计时显示
+  countdown.value = formatCountdown(totalSeconds)
   
   countdownTimer = setInterval(() => {
     if (totalSeconds <= 0) {
@@ -175,16 +135,7 @@ const startCountdown = () => {
     }
     
     totalSeconds--
-    
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
-    
-    countdown.value = {
-      hours: String(hours).padStart(2, '0'),
-      minutes: String(minutes).padStart(2, '0'),
-      seconds: String(seconds).padStart(2, '0')
-    }
+    countdown.value = formatCountdown(totalSeconds)
   }, 1000)
 }
 

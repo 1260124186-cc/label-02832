@@ -1,56 +1,77 @@
 <template>
-  <div class="search-bar">
+  <div class="search-bar" role="banner">
     <div class="container">
       <!-- Logo -->
       <div class="logo">
-        <a href="/">
+        <a href="/" aria-label="京东首页">
           <div class="logo-img">
-            <span class="logo-text">JD</span>
+            <span class="logo-text" aria-hidden="true">JD</span>
             <span class="logo-slogan">京东</span>
           </div>
         </a>
       </div>
       
       <!-- 搜索框 -->
-      <div class="search-box">
+      <div class="search-box" role="search">
         <div class="search-input-wrap">
+          <label for="search-input" class="visually-hidden">搜索商品</label>
           <input 
+            id="search-input"
             v-model="searchKeyword"
-            type="text" 
+            type="search" 
             class="search-input" 
             placeholder="搜索商品"
+            autocomplete="off"
+            aria-autocomplete="list"
+            :aria-expanded="showHistory && searchHistory.length > 0"
+            aria-controls="search-history-list"
             @keyup.enter="handleSearch"
             @focus="showHistory = true"
           />
-          <button class="search-btn" @click="handleSearch">
-            <el-icon><Search /></el-icon>
+          <button 
+            class="search-btn" 
+            @click="handleSearch"
+            aria-label="搜索"
+          >
+            <el-icon aria-hidden="true"><Search /></el-icon>
             <span>搜索</span>
           </button>
         </div>
         
         <!-- 热门搜索 -->
-        <div class="hot-words">
+        <nav class="hot-words" aria-label="热门搜索">
           <a 
             v-for="word in hotWords" 
             :key="word" 
             href="#"
+            role="button"
             @click.prevent="selectHotWord(word)"
           >
             {{ word }}
           </a>
-        </div>
+        </nav>
         
         <!-- 搜索历史下拉 -->
-        <div v-if="showHistory && searchHistory.length" class="search-history">
+        <div 
+          v-if="showHistory && searchHistory.length" 
+          id="search-history-list"
+          class="search-history"
+          role="listbox"
+          aria-label="搜索历史"
+        >
           <div class="history-header">
-            <span>搜索历史</span>
-            <a href="#" @click.prevent="clearHistory">清空</a>
+            <span id="history-label">搜索历史</span>
+            <button 
+              @click.prevent="clearHistory"
+              aria-label="清空搜索历史"
+            >清空</button>
           </div>
-          <div class="history-list">
+          <div class="history-list" role="group" aria-labelledby="history-label">
             <a 
               v-for="item in searchHistory" 
               :key="item" 
               href="#"
+              role="option"
               @click.prevent="selectHistory(item)"
             >
               {{ item }}
@@ -61,20 +82,26 @@
       
       <!-- 购物车 - 放在最右侧 -->
       <div class="cart">
-        <a href="javascript:void(0)" class="cart-btn" @click="handleClick">
-          <el-icon><ShoppingCart /></el-icon>
+        <a 
+          href="javascript:void(0)" 
+          class="cart-btn" 
+          @click="handleClick"
+          aria-label="我的购物车，{{ cartStore.cartCount }} 件商品"
+          aria-haspopup="true"
+        >
+          <el-icon aria-hidden="true"><ShoppingCart /></el-icon>
           <span>我的购物车</span>
-          <span class="cart-count">{{ cartStore.cartCount }}</span>
+          <span class="cart-count" aria-hidden="true">{{ cartStore.cartCount }}</span>
         </a>
         
         <!-- 购物车悬浮层 -->
-        <div class="cart-dropdown">
-          <div v-if="cartStore.cartItems.length === 0" class="cart-empty">
-            <el-icon class="empty-icon"><ShoppingCartFull /></el-icon>
+        <div class="cart-dropdown" role="dialog" aria-label="购物车">
+          <div v-if="cartStore.cartItems.length === 0" class="cart-empty" role="status">
+            <el-icon class="empty-icon" aria-hidden="true"><ShoppingCartFull /></el-icon>
             <p>购物车还是空的，快去挑选商品吧！</p>
           </div>
-          <div v-else class="cart-list">
-            <div v-for="item in cartStore.cartItems" :key="item.id" class="cart-item">
+          <div v-else class="cart-list" role="list" aria-label="购物车商品列表">
+            <div v-for="item in cartStore.cartItems" :key="item.id" class="cart-item" role="listitem">
               <img :src="item.image" :alt="item.name" class="item-img" />
               <div class="item-info">
                 <p class="item-name">{{ item.name }}</p>
@@ -98,7 +125,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Search, ShoppingCart, ShoppingCartFull, Close } from '@element-plus/icons-vue'
 import { showDevelopingToast, showErrorToast } from '@/utils/toast'
 import { useCartStore } from '@/stores/cart'
@@ -110,11 +137,40 @@ import { hotSearchWords, defaultSearchHistory } from '@/mock/banner'
 // 创建日志记录器
 const logger = createLogger('SearchBar')
 
+// localStorage key
+const SEARCH_HISTORY_KEY = 'jd_search_history'
+
 // 搜索配置
 const SEARCH_CONFIG = {
   minLength: 1,        // 最小搜索长度
   maxLength: 100,      // 最大搜索长度
   maxHistoryItems: 10  // 最大历史记录数
+}
+
+// 从 localStorage 读取搜索历史
+const loadSearchHistory = () => {
+  try {
+    const stored = localStorage.getItem(SEARCH_HISTORY_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed)) {
+        return parsed
+      }
+    }
+  } catch (e) {
+    logger.error('读取搜索历史失败:', e)
+  }
+  // 如果没有存储的历史记录，返回默认值
+  return [...defaultSearchHistory]
+}
+
+// 保存搜索历史到 localStorage
+const saveSearchHistory = (history) => {
+  try {
+    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history))
+  } catch (e) {
+    logger.error('保存搜索历史失败:', e)
+  }
 }
 
 const cartStore = useCartStore()
@@ -123,9 +179,18 @@ const searchKeyword = ref('')
 const showHistory = ref(false)
 const searchError = ref('')
 
-// 使用 mock 数据
-const searchHistory = ref([...defaultSearchHistory])
+// 从 localStorage 初始化搜索历史
+const searchHistory = ref(loadSearchHistory())
 const hotWords = ref(hotSearchWords)
+
+// 监听搜索历史变化，自动保存到 localStorage
+watch(
+  searchHistory,
+  (newHistory) => {
+    saveSearchHistory(newHistory)
+  },
+  { deep: true }
+)
 
 // 输入校验
 const validateSearchInput = (keyword) => {

@@ -33,8 +33,8 @@
             <h3 class="column-title">联系我们</h3>
             <div class="contact-info">
               <div class="hotline">
-                <p class="phone">400-606-5500</p>
-                <p class="time">客服热线 8:00-22:00</p>
+                <p class="phone">{{ contact.hotline }}</p>
+                <p class="time">{{ contact.serviceTime }}</p>
               </div>
               <div class="qrcode">
                 <div class="qr-placeholder">
@@ -62,38 +62,24 @@
     <div class="copyright">
       <div class="container">
         <div class="copyright-links">
-          <a href="javascript:void(0)" @click="handleClick">关于我们</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">联系我们</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">人才招聘</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">商家入驻</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">广告服务</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">手机京东</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">友情链接</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">销售联盟</a>
-          <span class="divider">|</span>
-          <a href="javascript:void(0)" @click="handleClick">京东社区</a>
+          <template v-for="(link, index) in copyrightLinksData" :key="link.name">
+            <a href="javascript:void(0)" @click="handleClick">{{ link.name }}</a>
+            <span v-if="index < copyrightLinksData.length - 1" class="divider">|</span>
+          </template>
         </div>
         
         <div class="copyright-text">
           <p>
-            <a href="javascript:void(0)" @click="handleClick">京公网安备 11000002000088号</a>
-            <span class="divider">|</span>
-            <a href="javascript:void(0)" @click="handleClick">京ICP备11041704号</a>
-            <span class="divider">|</span>
-            <a href="javascript:void(0)" @click="handleClick">京ICP证070359号</a>
+            <template v-for="(item, index) in filingInfoData" :key="item.name">
+              <a href="javascript:void(0)" @click="handleClick">{{ item.name }}</a>
+              <span v-if="index < filingInfoData.length - 1" class="divider">|</span>
+            </template>
           </p>
           <p>
-            Copyright © 2004-{{ currentYear }} 京东JD.com 版权所有
+            Copyright © {{ copyright.startYear }}-{{ currentYear }} {{ copyright.company }} 版权所有
           </p>
           <p class="note">
-            注：本站商品信息均来自于合作方，其真实性、准确性和合法性由信息拥有者（合作方）负责。
+            {{ copyright.note }}
           </p>
         </div>
         
@@ -118,49 +104,33 @@ import {
 } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
 
+// 从 mock 数据导入
+import { 
+  serviceGuarantees, 
+  helpColumns as mockHelpColumns, 
+  contactInfo,
+  friendLinks as mockFriendLinks,
+  copyrightLinks,
+  filingInfo,
+  certifications as mockCertifications,
+  copyrightText
+} from '@/mock/footer'
+
 const currentYear = computed(() => new Date().getFullYear())
 
 const handleClick = () => {
   showDevelopingToast()
 }
 
-const services = ref([
-  { id: 1, icon: 'Van', title: '品类齐全', desc: '轻松购物' },
-  { id: 2, icon: 'CreditCard', title: '多仓直发', desc: '极速配送' },
-  { id: 3, icon: 'CircleCheck', title: '正品行货', desc: '精致服务' },
-  { id: 4, icon: 'Service', title: '天天低价', desc: '畅选无忧' },
-  { id: 5, icon: 'Lock', title: '准时送达', desc: '售后无忧' }
-])
-
-const helpColumns = ref([
-  {
-    title: '购物指南',
-    links: ['购物流程', '会员介绍', '生活旅行', '常见问题', '大家电', '联系客服']
-  },
-  {
-    title: '配送方式',
-    links: ['上门自提', '211限时达', '配送服务查询', '配送费收取标准', '海外配送']
-  },
-  {
-    title: '支付方式',
-    links: ['货到付款', '在线支付', '分期付款', '邮局汇款', '公司转账']
-  },
-  {
-    title: '售后服务',
-    links: ['售后政策', '价格保护', '退款说明', '返修/退换货', '取消订单']
-  }
-])
-
-const friendLinks = ref([
-  '京东商城', '京东金融', '京东云', '京东物流', '京东健康',
-  '京东国际', '京东超市', '京东生鲜', '京东到家', '京东拍卖'
-])
-
-const certifications = ref([
-  { name: '经营证照', icon: 'Document' },
-  { name: '诚信网站', icon: 'Medal' },
-  { name: '网警备案', icon: 'Lock' }
-])
+// 使用 mock 数据
+const services = ref(serviceGuarantees)
+const helpColumns = ref(mockHelpColumns)
+const contact = ref(contactInfo)
+const friendLinks = ref(mockFriendLinks)
+const copyrightLinksData = ref(copyrightLinks)
+const filingInfoData = ref(filingInfo)
+const certifications = ref(mockCertifications)
+const copyright = ref(copyrightText)
 </script>
 
 <style lang="scss" scoped>

@@ -4,17 +4,22 @@
       <div class="top-bar-left">
         <a href="javascript:void(0)" class="location" @click="handleClick">
           <el-icon><Location /></el-icon>
-          <span>北京</span>
+          <span>{{ locationInfo.city }}</span>
           <el-icon class="arrow"><ArrowDown /></el-icon>
         </a>
       </div>
       <div class="top-bar-right">
         <div class="nav-item">
-          <a href="javascript:void(0)" @click="handleClick">你好，请登录</a>
-          <a href="javascript:void(0)" class="highlight" @click="handleClick">免费注册</a>
+          <template v-for="link in userLinks" :key="link.id">
+            <a 
+              href="javascript:void(0)" 
+              :class="{ highlight: link.isHighlight }" 
+              @click="handleClick"
+            >{{ link.name }}</a>
+          </template>
         </div>
         <div class="nav-item">
-          <a href="javascript:void(0)" @click="handleClick">我的订单</a>
+          <a href="javascript:void(0)" @click="handleClick">{{ topBarLinks[0].name }}</a>
         </div>
         <div class="nav-item dropdown">
           <a href="javascript:void(0)" @click="handleClick">
@@ -22,19 +27,19 @@
             <el-icon class="arrow"><ArrowDown /></el-icon>
           </a>
           <div class="dropdown-menu">
-            <a href="javascript:void(0)" @click="handleClick">待处理订单</a>
-            <a href="javascript:void(0)" @click="handleClick">消息</a>
-            <a href="javascript:void(0)" @click="handleClick">返修退换货</a>
-            <a href="javascript:void(0)" @click="handleClick">我的回答</a>
-            <a href="javascript:void(0)" @click="handleClick">降价商品</a>
-            <a href="javascript:void(0)" @click="handleClick">我的关注</a>
+            <a 
+              v-for="link in myJdLinks" 
+              :key="link.id" 
+              href="javascript:void(0)" 
+              @click="handleClick"
+            >{{ link.name }}</a>
           </div>
         </div>
         <div class="nav-item">
-          <a href="javascript:void(0)" @click="handleClick">京东会员</a>
+          <a href="javascript:void(0)" @click="handleClick">{{ topBarLinks[1].name }}</a>
         </div>
         <div class="nav-item">
-          <a href="javascript:void(0)" @click="handleClick">企业采购</a>
+          <a href="javascript:void(0)" @click="handleClick">{{ topBarLinks[2].name }}</a>
         </div>
         <div class="nav-item dropdown">
           <a href="javascript:void(0)" @click="handleClick">
@@ -42,11 +47,12 @@
             <el-icon class="arrow"><ArrowDown /></el-icon>
           </a>
           <div class="dropdown-menu">
-            <a href="javascript:void(0)" @click="handleClick">帮助中心</a>
-            <a href="javascript:void(0)" @click="handleClick">售后服务</a>
-            <a href="javascript:void(0)" @click="handleClick">在线客服</a>
-            <a href="javascript:void(0)" @click="handleClick">意见建议</a>
-            <a href="javascript:void(0)" @click="handleClick">电话客服</a>
+            <a 
+              v-for="link in serviceLinks" 
+              :key="link.id" 
+              href="javascript:void(0)" 
+              @click="handleClick"
+            >{{ link.name }}</a>
           </div>
         </div>
         <div class="nav-item dropdown">
@@ -55,21 +61,23 @@
             <el-icon class="arrow"><ArrowDown /></el-icon>
           </a>
           <div class="dropdown-menu dropdown-menu-wide">
-            <div class="dropdown-section">
-              <h4>特色主题</h4>
-              <a href="javascript:void(0)" @click="handleClick">京东试用</a>
-              <a href="javascript:void(0)" @click="handleClick">京东金融</a>
-              <a href="javascript:void(0)" @click="handleClick">京东拍卖</a>
-            </div>
-            <div class="dropdown-section">
-              <h4>企业服务</h4>
-              <a href="javascript:void(0)" @click="handleClick">企业采购</a>
-              <a href="javascript:void(0)" @click="handleClick">企业金融</a>
+            <div 
+              v-for="section in siteNavigation" 
+              :key="section.id" 
+              class="dropdown-section"
+            >
+              <h4>{{ section.title }}</h4>
+              <a 
+                v-for="link in section.links" 
+                :key="link.name" 
+                href="javascript:void(0)" 
+                @click="handleClick"
+              >{{ link.name }}</a>
             </div>
           </div>
         </div>
         <div class="nav-item">
-          <a href="javascript:void(0)" @click="handleClick">手机京东</a>
+          <a href="javascript:void(0)" @click="handleClick">{{ topBarLinks[3].name }}</a>
         </div>
       </div>
     </div>
@@ -77,12 +85,34 @@
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import { Location, ArrowDown } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
+
+// 从 mock 数据导入
+import { 
+  userLinks as mockUserLinks,
+  myJdLinks as mockMyJdLinks,
+  serviceLinks as mockServiceLinks,
+  siteNavigation as mockSiteNavigation,
+  topBarLinks as mockTopBarLinks
+} from '@/mock/navigation'
 
 const handleClick = () => {
   showDevelopingToast()
 }
+
+// 位置信息
+const locationInfo = ref({
+  city: '北京'
+})
+
+// 使用 mock 数据
+const userLinks = ref(mockUserLinks)
+const myJdLinks = ref(mockMyJdLinks)
+const serviceLinks = ref(mockServiceLinks)
+const siteNavigation = ref(mockSiteNavigation)
+const topBarLinks = ref(mockTopBarLinks)
 </script>
 
 <style lang="scss" scoped>

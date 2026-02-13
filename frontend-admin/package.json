@@ -7,7 +7,13 @@
     "dev": "vite --host 0.0.0.0 --port 8082",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 8082",
-    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
+    "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore",
+    "lint:check": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --ignore-path .gitignore",
+    "format": "prettier --write \"src/**/*.{js,vue,scss,css,json}\"",
+    "format:check": "prettier --check \"src/**/*.{js,vue,scss,css,json}\"",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
@@ -18,10 +24,16 @@
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.0.4",
+    "@vue/test-utils": "^2.4.4",
     "autoprefixer": "^10.4.18",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.23.0",
+    "happy-dom": "^13.6.2",
     "postcss": "^8.4.35",
+    "prettier": "^3.2.5",
     "sass": "^1.71.1",
     "terser": "^5.46.0",
-    "vite": "^5.1.6"
+    "vite": "^5.1.6",
+    "vitest": "^1.3.1"
   }
 }

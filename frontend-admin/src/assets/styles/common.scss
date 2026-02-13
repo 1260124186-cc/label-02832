@@ -309,3 +309,126 @@
   opacity: 0;
   transform: translateY(20px);
 }
+
+// ============================================
+// 图片懒加载样式
+// ============================================
+.lazy-img {
+  transition: opacity 0.3s ease;
+  
+  &.lazy-loading {
+    opacity: 0.6;
+    filter: blur(2px);
+  }
+  
+  &.lazy-loaded {
+    opacity: 1;
+    filter: none;
+  }
+  
+  &.lazy-error {
+    opacity: 0.5;
+  }
+}
+
+// 图片加载占位背景
+img[data-src] {
+  background: linear-gradient(
+    90deg,
+    #f5f5f5 25%,
+    #e8e8e8 50%,
+    #f5f5f5 75%
+  );
+  background-size: 200% 100%;
+  animation: img-loading 1.5s infinite;
+}
+
+@keyframes img-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+// ============================================
+// 无障碍辅助样式
+// ============================================
+
+// 视觉隐藏但屏幕阅读器可读
+.visually-hidden,
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// 仅在聚焦时显示（跳过链接等）
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+// 跳过导航链接
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: $jd-red;
+  color: $color-white;
+  padding: $spacing-sm $spacing-md;
+  z-index: $z-index-fixed + 1;
+  text-decoration: none;
+  font-weight: $font-weight-medium;
+  transition: top 0.2s ease;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+// 焦点样式增强
+:focus-visible {
+  outline: 2px solid $jd-red;
+  outline-offset: 2px;
+}
+
+// 减少动画（尊重用户偏好）
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+// 高对比度模式支持
+@media (prefers-contrast: high) {
+  .product-card,
+  .brand-card,
+  .category-item {
+    border: 2px solid currentColor;
+  }
+  
+  a:focus,
+  button:focus {
+    outline: 3px solid currentColor;
+  }
+}

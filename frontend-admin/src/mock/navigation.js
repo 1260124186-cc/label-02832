@@ -113,3 +113,31 @@ export const footerLinks = {
     { name: '价格保护', url: '/help/price-protection' }
   ]
 }
+
+/**
+ * 移动端菜单 - 用户欢迎信息
+ */
+export const mobileUserInfo = {
+  welcomeText: 'Hi，欢迎来到京东！',
+  loginText: '登录',
+  registerText: '注册'
+}
+
+/**
+ * 移动端菜单 - 快捷入口
+ */
+export const mobileQuickLinks = [
+  { id: 1, name: '我的订单', icon: 'Document', url: '/order' },
+  { id: 2, name: '购物车', icon: 'ShoppingCart', url: '/cart' },
+  { id: 3, name: '我的收藏', icon: 'Goods', url: '/favorite' },
+  { id: 4, name: '优惠券', icon: 'Ticket', url: '/coupon' }
+]
+
+/**
+ * 移动端菜单 - 底部链接
+ */
+export const mobileFooterLinks = [
+  { id: 1, name: '首页', icon: 'Location', url: '/' },
+  { id: 2, name: '客户服务', icon: 'Service', url: '/service' },
+  { id: 3, name: '设置', icon: 'Setting', url: '/setting' }
+]

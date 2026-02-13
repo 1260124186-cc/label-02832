@@ -11,7 +11,10 @@ src/mock/
 ├── products.js         # 商品数据
 ├── categories.js       # 分类数据
 ├── banner.js           # 轮播图、快报、服务入口数据
-└── navigation.js       # 导航链接数据
+├── navigation.js       # 导航链接数据
+├── footer.js           # 页脚数据（服务保障、帮助中心、版权信息等）
+├── brands.js           # 品牌专区数据
+└── flashSale.js        # 限时秒杀数据
 ```
 
 ## 数据说明
@@ -60,6 +63,46 @@ src/mock/
 
 包含以下数据：
 - `navLinks` - 顶部导航链接（9个）
+- `userLinks` - 用户登录/注册链接
+- `myJdLinks` - "我的京东"下拉菜单
+- `serviceLinks` - "客户服务"下拉菜单
+- `siteNavigation` - "网站导航"下拉菜单
+- `topBarLinks` - 顶部栏其他链接
+- `mobileUserInfo` - 移动端菜单用户信息
+- `mobileQuickLinks` - 移动端快捷入口
+- `mobileFooterLinks` - 移动端底部链接
+
+### 页脚数据 (footer.js)
+
+包含以下数据：
+- `serviceGuarantees` - 服务保障数据（5个）
+- `helpColumns` - 帮助中心栏目（4个）
+- `contactInfo` - 联系我们信息
+- `friendLinks` - 友情链接（10个）
+- `copyrightLinks` - 版权链接（9个）
+- `filingInfo` - 备案信息
+- `certifications` - 认证信息（3个）
+- `copyrightText` - 版权声明
+
+### 品牌数据 (brands.js)
+
+包含以下数据：
+- `brandTabs` - 品牌分类标签页
+- `allBrands` - 全部品牌首页展示
+- `phoneBrands` - 手机数码品牌
+- `applianceBrands` - 家电品牌
+- `beautyBrands` - 美妆品牌
+- `fashionBrands` - 服饰鞋包品牌
+- `moreBrands` - 更多品牌入口
+- `getBrandsByCategory()` - 根据分类获取品牌列表
+
+### 秒杀数据 (flashSale.js)
+
+包含以下数据：
+- `flashSaleConfig` - 秒杀配置（标题、副标题、场次时间）
+- `flashSaleProducts` - 秒杀商品列表（5个）
+- `getFlashSaleRemainingTime()` - 获取当前场次剩余时间
+- `formatCountdown()` - 格式化倒计时
 
 ## 使用方式
 

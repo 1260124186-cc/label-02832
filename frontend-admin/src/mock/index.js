@@ -39,5 +39,40 @@ export {
   serviceLinks,
   siteNavigation,
   topBarLinks,
-  footerLinks
+  footerLinks,
+  mobileUserInfo,
+  mobileQuickLinks,
+  mobileFooterLinks
 } from './navigation'
+
+// 页脚数据
+export {
+  serviceGuarantees,
+  helpColumns,
+  contactInfo,
+  friendLinks as footerFriendLinks,
+  copyrightLinks,
+  filingInfo,
+  certifications,
+  copyrightText
+} from './footer'
+
+// 品牌数据
+export {
+  brandTabs,
+  allBrands,
+  phoneBrands,
+  applianceBrands,
+  beautyBrands,
+  fashionBrands,
+  moreBrands,
+  getBrandsByCategory
+} from './brands'
+
+// 秒杀数据
+export {
+  flashSaleConfig,
+  flashSaleProducts,
+  getFlashSaleRemainingTime,
+  formatCountdown
+} from './flashSale'

@@ -1,20 +1,28 @@
 <template>
-  <div class="product-card" @click="handleClick">
-    <!-- 商品图片 -->
+  <article 
+    class="product-card" 
+    @click="handleClick"
+    role="article"
+    :aria-label="`商品：${product.name}，价格：${product.price}元`"
+    tabindex="0"
+    @keydown.enter="handleClick"
+  >
+    <!-- 商品图片 - 使用懒加载 -->
     <div class="product-image">
       <img 
-        :src="product.image" 
+        v-lazy-img="product.image" 
         :alt="product.name"
         class="product-img"
       />
       
       <!-- 标签 -->
-      <div v-if="product.tags && product.tags.length" class="product-tags">
+      <div v-if="product.tags && product.tags.length" class="product-tags" aria-label="商品标签">
         <span 
           v-for="tag in product.tags" 
           :key="tag.text" 
           class="tag"
           :class="tag.type"
+          role="status"
         >
           {{ tag.text }}
         </span>
@@ -25,7 +33,7 @@
     <div class="product-info">
       <!-- 商品名称 -->
       <h3 class="product-name">
-        <span v-if="product.isJdLogistics" class="jd-tag">京东物流</span>
+        <span v-if="product.isJdLogistics" class="jd-tag" aria-label="京东物流配送">京东物流</span>
         {{ product.name }}
       </h3>
       
@@ -33,42 +41,52 @@
       <p v-if="product.desc" class="product-desc">{{ product.desc }}</p>
       
       <!-- 价格区域 -->
-      <div class="product-price">
-        <span class="price-current">
-          <span class="symbol">¥</span>
+      <div class="product-price" aria-label="商品价格">
+        <span class="price-current" aria-label="当前价格">
+          <span class="symbol" aria-hidden="true">¥</span>
           <span class="integer">{{ priceInteger }}</span>
-          <span v-if="priceDecimal" class="decimal">.{{ priceDecimal }}</span>
+          <span v-if="priceDecimal" class="decimal" aria-hidden="true">.{{ priceDecimal }}</span>
         </span>
-        <span v-if="product.originalPrice" class="price-original">
-          ¥{{ product.originalPrice }}
+        <span v-if="product.originalPrice" class="price-original" aria-label="原价">
+          <span class="visually-hidden">原价</span>¥{{ product.originalPrice }}
         </span>
       </div>
       
       <!-- 评价信息 -->
-      <div v-if="product.comments" class="product-comments">
+      <div v-if="product.comments" class="product-comments" aria-label="评价信息">
         <span class="count">{{ formatComments(product.comments) }}条评价</span>
         <span v-if="product.goodRate" class="rate">好评{{ product.goodRate }}%</span>
       </div>
       
       <!-- 促销信息 -->
-      <div v-if="product.promotion" class="product-promotion">
-        <el-icon><Ticket /></el-icon>
+      <div v-if="product.promotion" class="product-promotion" role="status" aria-label="促销信息">
+        <el-icon aria-hidden="true"><Ticket /></el-icon>
         <span>{{ product.promotion }}</span>
       </div>
     </div>
     
     <!-- 悬浮操作 -->
-    <div class="product-actions">
-      <button class="action-btn" @click.stop="handleAddCart">
-        <el-icon><ShoppingCart /></el-icon>
+    <div class="product-actions" role="group" aria-label="商品操作">
+      <button 
+        class="action-btn" 
+        @click.stop="handleAddCart"
+        aria-label="将此商品加入购物车"
+      >
+        <el-icon aria-hidden="true"><ShoppingCart /></el-icon>
         <span>加入购物车</span>
       </button>
-      <button class="action-btn" :class="{ collected: isCollected }" @click.stop="handleCollect">
-        <el-icon><StarFilled v-if="isCollected" /><Star v-else /></el-icon>
+      <button 
+        class="action-btn" 
+        :class="{ collected: isCollected }" 
+        @click.stop="handleCollect"
+        :aria-pressed="isCollected"
+        :aria-label="isCollected ? '取消收藏此商品' : '收藏此商品'"
+      >
+        <el-icon aria-hidden="true"><StarFilled v-if="isCollected" /><Star v-else /></el-icon>
         <span>{{ isCollected ? '已收藏' : '收藏' }}</span>
       </button>
     </div>
-  </div>
+  </article>
 </template>
 
 <script setup>
@@ -167,6 +185,24 @@ const handleCollect = () => {
     max-width: 90%;
     max-height: 90%;
     object-fit: contain;
+    transition: opacity 0.3s ease;
+    
+    // 懒加载相关样式
+    &.lazy-img {
+      opacity: 0.5;
+    }
+    
+    &.lazy-loading {
+      opacity: 0.5;
+    }
+    
+    &.lazy-loaded {
+      opacity: 1;
+    }
+    
+    &.lazy-error {
+      opacity: 0.5;
+    }
   }
   
   .product-tags {

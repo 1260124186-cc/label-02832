@@ -150,9 +150,7 @@ docker pull --platform linux/amd64 node:20-alpine
 docker pull --platform linux/amd64 nginx:alpine
 ```
 
-## 子项目说明
-
-### frontend-admin (管理后台前端)
+## 项目说明
 
 基于 Vue 3 的京东商城风格管理后台前端。
 

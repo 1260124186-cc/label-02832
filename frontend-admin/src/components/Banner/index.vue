@@ -3,45 +3,69 @@
     <div class="container">
       <div class="banner-wrapper">
         <!-- 左侧分类菜单 -->
-        <div class="side-category">
+        <nav class="side-category" role="navigation" aria-label="商品分类导航">
           <div 
             v-for="(cat, index) in sideCategories" 
             :key="cat.id"
             class="category-item"
+            role="menuitem"
+            :aria-expanded="activeSideCategory === index"
+            :aria-haspopup="cat.children && cat.children.length > 0"
+            tabindex="0"
             @mouseenter="activeSideCategory = index"
             @mouseleave="activeSideCategory = -1"
+            @focus="activeSideCategory = index"
+            @blur="activeSideCategory = -1"
+            @keydown.enter="handleClick"
           >
             <span class="cat-name">{{ cat.name }}</span>
-            <el-icon class="arrow"><ArrowRight /></el-icon>
+            <el-icon class="arrow" aria-hidden="true"><ArrowRight /></el-icon>
             
             <!-- 子分类浮层 -->
             <transition name="slide-right">
-              <div v-if="activeSideCategory === index" class="sub-panel">
-                <div v-for="sub in cat.children" :key="sub.title" class="sub-group">
-                  <h4>{{ sub.title }}</h4>
-                  <div class="sub-links">
-                    <a v-for="link in sub.links" :key="link" href="javascript:void(0)" @click="handleClick">{{ link }}</a>
+              <div 
+                v-if="activeSideCategory === index" 
+                class="sub-panel"
+                role="menu"
+                :aria-label="`${cat.name}子分类`"
+              >
+                <div v-for="sub in cat.children" :key="sub.title" class="sub-group" role="group" :aria-label="sub.title">
+                  <h4 id="sub-title">{{ sub.title }}</h4>
+                  <div class="sub-links" role="menu">
+                    <a 
+                      v-for="link in sub.links" 
+                      :key="link" 
+                      href="javascript:void(0)" 
+                      role="menuitem"
+                      @click="handleClick"
+                    >{{ link }}</a>
                   </div>
                 </div>
               </div>
             </transition>
           </div>
-        </div>
+        </nav>
         
         <!-- 中间轮播图 -->
         <div 
           class="main-carousel"
+          role="region"
+          aria-label="促销轮播图"
+          aria-roledescription="carousel"
           @mouseenter="pauseAutoPlay"
           @mouseleave="resumeAutoPlay"
+          @touchstart="handleTouchStart"
+          @touchmove="handleTouchMove"
+          @touchend="handleTouchEnd"
         >
           <!-- 轮播图为空时的占位 -->
-          <div v-if="!hasSlides" class="carousel-empty">
-            <el-icon :size="48"><Present /></el-icon>
+          <div v-if="!hasSlides" class="carousel-empty" role="status" aria-live="polite">
+            <el-icon :size="48" aria-hidden="true"><Present /></el-icon>
             <p>暂无轮播内容</p>
           </div>
           
           <!-- 轮播图内容 -->
-          <div v-else class="carousel-container">
+          <div v-else class="carousel-container" aria-live="off">
             <div 
               class="carousel-track" 
               :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
@@ -50,6 +74,10 @@
                 v-for="(slide, index) in slides" 
                 :key="slide.id || index" 
                 class="carousel-slide"
+                role="group"
+                :aria-roledescription="'slide'"
+                :aria-label="`第 ${index + 1} 张，共 ${slides.length} 张：${slide.title || '促销活动'}`"
+                :aria-hidden="currentSlide !== index"
                 :style="{ background: slide.bgColor || '#e1251b' }"
               >
                 <div class="slide-content">
@@ -58,7 +86,7 @@
                     <p>{{ slide.subtitle || '' }}</p>
                     <button class="slide-btn" @click="handleClick">{{ slide.btnText || '立即查看' }}</button>
                   </div>
-                  <div class="slide-image">
+                  <div class="slide-image" aria-hidden="true">
                     <div class="image-placeholder" :style="{ background: slide.imgBg || 'rgba(255,255,255,0.1)' }">
                       <el-icon :size="60"><component :is="slide.icon || 'Present'" /></el-icon>
                     </div>
@@ -69,23 +97,39 @@
             
             <!-- 轮播控制（仅多张时显示） -->
             <template v-if="slides.length > 1">
-              <button class="carousel-btn prev" @click="prevSlide">
-                <el-icon><ArrowLeft /></el-icon>
+              <button 
+                class="carousel-btn prev" 
+                @click="prevSlide"
+                aria-label="上一张幻灯片"
+              >
+                <el-icon aria-hidden="true"><ArrowLeft /></el-icon>
               </button>
-              <button class="carousel-btn next" @click="nextSlide">
-                <el-icon><ArrowRight /></el-icon>
+              <button 
+                class="carousel-btn next" 
+                @click="nextSlide"
+                aria-label="下一张幻灯片"
+              >
+                <el-icon aria-hidden="true"><ArrowRight /></el-icon>
               </button>
             </template>
             
             <!-- 轮播指示器（仅多张时显示） -->
-            <div v-if="slides.length > 1" class="carousel-dots">
-              <span 
+            <div 
+              v-if="slides.length > 1" 
+              class="carousel-dots"
+              role="tablist"
+              aria-label="幻灯片选择"
+            >
+              <button 
                 v-for="(_, index) in slides" 
                 :key="index"
                 class="dot"
+                role="tab"
+                :aria-selected="currentSlide === index"
+                :aria-label="`跳转到第 ${index + 1} 张幻灯片`"
                 :class="{ active: currentSlide === index }"
                 @click="goToSlide(index)"
-              ></span>
+              ></button>
             </div>
           </div>
         </div>
@@ -168,6 +212,14 @@ const activeSideCategory = ref(-1)
 const isPlaying = ref(false)
 const hasError = ref(false)
 let autoPlayTimer = null
+
+// 触摸滑动相关状态
+const touchStartX = ref(0)
+const touchStartY = ref(0)
+const touchEndX = ref(0)
+const touchEndY = ref(0)
+const isSwiping = ref(false)
+const swipeThreshold = 50 // 滑动阈值（像素）
 
 const handleClick = () => {
   showDevelopingToast()
@@ -333,6 +385,68 @@ const resumeAutoPlay = () => {
     startAutoPlay()
     logger.debug('恢复自动播放')
   }
+}
+
+// 触摸事件处理
+const handleTouchStart = (e) => {
+  if (!hasSlides.value || slides.value.length <= 1) return
+  
+  const touch = e.touches[0]
+  touchStartX.value = touch.clientX
+  touchStartY.value = touch.clientY
+  isSwiping.value = true
+  
+  // 暂停自动播放
+  pauseAutoPlay()
+  logger.debug('触摸开始', { x: touchStartX.value, y: touchStartY.value })
+}
+
+const handleTouchMove = (e) => {
+  if (!isSwiping.value) return
+  
+  const touch = e.touches[0]
+  touchEndX.value = touch.clientX
+  touchEndY.value = touch.clientY
+  
+  // 计算水平和垂直移动距离
+  const diffX = Math.abs(touchEndX.value - touchStartX.value)
+  const diffY = Math.abs(touchEndY.value - touchStartY.value)
+  
+  // 如果是水平滑动为主，阻止默认滚动行为
+  if (diffX > diffY && diffX > 10) {
+    e.preventDefault()
+  }
+}
+
+const handleTouchEnd = () => {
+  if (!isSwiping.value) return
+  
+  const diffX = touchEndX.value - touchStartX.value
+  const diffY = Math.abs(touchEndY.value - touchStartY.value)
+  const absDiffX = Math.abs(diffX)
+  
+  // 只有水平滑动距离大于阈值且大于垂直滑动时才触发切换
+  if (absDiffX > swipeThreshold && absDiffX > diffY) {
+    if (diffX > 0) {
+      // 向右滑动，显示上一张
+      prevSlide()
+      logger.info('触摸滑动：上一张')
+    } else {
+      // 向左滑动，显示下一张
+      nextSlide()
+      logger.info('触摸滑动：下一张')
+    }
+  }
+  
+  // 重置状态
+  isSwiping.value = false
+  touchStartX.value = 0
+  touchStartY.value = 0
+  touchEndX.value = 0
+  touchEndY.value = 0
+  
+  // 恢复自动播放
+  resumeAutoPlay()
 }
 
 // 监听轮播图数据变化
@@ -530,6 +644,8 @@ onUnmounted(() => {
   position: relative;
   overflow: hidden;
   min-width: 0; // 防止flex子元素溢出
+  touch-action: pan-y pinch-zoom; // 允许垂直滚动和缩放，但处理水平滑动
+  user-select: none; // 防止滑动时选中文本
   
   @include respond-to(md) {
     width: 100%;
