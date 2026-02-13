@@ -1,33 +1,33 @@
 <template>
   <div class="mobile-nav">
     <!-- 汉堡菜单按钮 -->
-    <button 
-      class="hamburger-btn" 
-      @click="toggleMenu" 
+    <button
+      class="hamburger-btn"
       :class="{ active: isMenuOpen }"
       :aria-expanded="isMenuOpen"
       aria-controls="mobile-menu-drawer"
       aria-label="打开导航菜单"
+      @click="toggleMenu"
     >
-      <span class="hamburger-line" aria-hidden="true"></span>
-      <span class="hamburger-line" aria-hidden="true"></span>
-      <span class="hamburger-line" aria-hidden="true"></span>
+      <span class="hamburger-line" aria-hidden="true" />
+      <span class="hamburger-line" aria-hidden="true" />
+      <span class="hamburger-line" aria-hidden="true" />
     </button>
 
     <!-- 遮罩层 -->
     <transition name="fade">
-      <div 
-        v-if="isMenuOpen" 
-        class="menu-overlay" 
-        @click="closeMenu"
+      <div
+        v-if="isMenuOpen"
+        class="menu-overlay"
         aria-hidden="true"
-      ></div>
+        @click="closeMenu"
+      />
     </transition>
 
     <!-- 侧边菜单 -->
     <transition name="slide-left">
-      <nav 
-        v-if="isMenuOpen" 
+      <nav
+        v-if="isMenuOpen"
         id="mobile-menu-drawer"
         class="menu-drawer"
         role="dialog"
@@ -37,7 +37,9 @@
         <!-- 菜单头部 -->
         <div class="menu-header">
           <div class="user-info">
-            <el-icon class="avatar" aria-hidden="true"><User /></el-icon>
+            <el-icon class="avatar" aria-hidden="true">
+              <User />
+            </el-icon>
             <div class="user-text">
               <span class="greeting">{{ userInfo.welcomeText }}</span>
               <div class="user-actions">
@@ -47,22 +49,24 @@
               </div>
             </div>
           </div>
-          <button 
-            class="close-btn" 
-            @click="closeMenu"
+          <button
+            class="close-btn"
             aria-label="关闭导航菜单"
+            @click="closeMenu"
           >
-            <el-icon aria-hidden="true"><Close /></el-icon>
+            <el-icon aria-hidden="true">
+              <Close />
+            </el-icon>
           </button>
         </div>
 
         <!-- 快捷入口 -->
         <div class="quick-links" role="navigation" aria-label="快捷入口">
-          <a 
-            v-for="link in quickLinks" 
-            :key="link.name" 
-            href="javascript:void(0)" 
-            class="quick-item" 
+          <a
+            v-for="link in quickLinks"
+            :key="link.name"
+            href="javascript:void(0)"
+            class="quick-item"
             @click="handleClick"
           >
             <el-icon aria-hidden="true"><component :is="link.icon" /></el-icon>
@@ -72,39 +76,41 @@
 
         <!-- 分类列表 -->
         <div class="category-list" role="navigation" aria-label="商品分类">
-          <div class="category-title" id="category-list-label">全部分类</div>
-          <div 
-            v-for="cat in categories" 
+          <div id="category-list-label" class="category-title">
+            全部分类
+          </div>
+          <div
+            v-for="cat in categories"
             :key="cat.id"
             class="category-item"
           >
-            <button 
+            <button
               class="category-main"
-              @click="toggleCategory(cat.id)"
               :aria-expanded="expandedCategory === cat.id"
               :aria-controls="`category-sub-${cat.id}`"
+              @click="toggleCategory(cat.id)"
             >
               <span class="cat-name">{{ cat.name }}</span>
               <el-icon class="arrow" :class="{ expanded: expandedCategory === cat.id }" aria-hidden="true">
                 <ArrowDown />
               </el-icon>
             </button>
-            
+
             <!-- 子分类 -->
             <transition name="expand">
-              <div 
-                v-if="expandedCategory === cat.id" 
+              <div
+                v-if="expandedCategory === cat.id"
                 :id="`category-sub-${cat.id}`"
                 class="category-sub"
                 role="region"
                 :aria-label="`${cat.name}子分类`"
               >
                 <div v-for="sub in cat.children" :key="sub.title" class="sub-group">
-                  <span class="sub-title" :id="`sub-title-${sub.title}`">{{ sub.title }}</span>
+                  <span :id="`sub-title-${sub.title}`" class="sub-title">{{ sub.title }}</span>
                   <div class="sub-links" role="list" :aria-labelledby="`sub-title-${sub.title}`">
-                    <a 
-                      v-for="link in sub.links" 
-                      :key="link" 
+                    <a
+                      v-for="link in sub.links"
+                      :key="link"
                       href="javascript:void(0)"
                       role="listitem"
                       @click="handleClick"
@@ -120,11 +126,11 @@
 
         <!-- 底部导航 -->
         <div class="menu-footer" role="navigation" aria-label="底部快捷链接">
-          <a 
-            v-for="link in footerLinks" 
-            :key="link.name" 
-            href="javascript:void(0)" 
-            class="footer-item" 
+          <a
+            v-for="link in footerLinks"
+            :key="link.name"
+            href="javascript:void(0)"
+            class="footer-item"
             @click="handleClick"
           >
             <el-icon aria-hidden="true"><component :is="link.icon" /></el-icon>
@@ -138,17 +144,17 @@
 
 <script setup>
 import { ref } from 'vue'
-import { 
+import {
   User, Close, ArrowDown,
   ShoppingCart, Goods, Ticket, Service,
   Location, Document, Setting
 } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
 import { sideCategories } from '@/mock/categories'
-import { 
+import {
   mobileUserInfo,
-  mobileQuickLinks, 
-  mobileFooterLinks 
+  mobileQuickLinks,
+  mobileFooterLinks
 } from '@/mock/navigation'
 
 const isMenuOpen = ref(false)
@@ -183,9 +189,11 @@ const footerLinks = ref(mobileFooterLinks)
 <style lang="scss" scoped>
 .mobile-nav {
   display: none;
-  
+
   @include respond-to(md) {
-    display: block;
+    display: flex;
+    align-items: center; // 确保内容垂直居中
+    flex-shrink: 0;
   }
 }
 
@@ -195,14 +203,14 @@ const footerLinks = ref(mobileFooterLinks)
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   padding: $spacing-xs;
   background: transparent;
   border: none;
   cursor: pointer;
   gap: 5px;
-  
+
   .hamburger-line {
     width: 22px;
     height: 2px;
@@ -210,7 +218,7 @@ const footerLinks = ref(mobileFooterLinks)
     border-radius: 1px;
     transition: all $transition-fast;
   }
-  
+
   &.active {
     .hamburger-line:nth-child(1) {
       transform: translateY(7px) rotate(45deg);
@@ -258,37 +266,37 @@ const footerLinks = ref(mobileFooterLinks)
   padding: $spacing-lg $spacing-md;
   background: linear-gradient(135deg, $jd-red 0%, #c81623 100%);
   color: $color-white;
-  
+
   .user-info {
     display: flex;
     align-items: center;
     gap: $spacing-sm;
-    
+
     .avatar {
       font-size: 40px;
       padding: $spacing-sm;
       background: rgba(255, 255, 255, 0.2);
       border-radius: $radius-round;
     }
-    
+
     .user-text {
       .greeting {
         font-size: $font-size-base;
         font-weight: $font-weight-medium;
       }
-      
+
       .user-actions {
         margin-top: $spacing-xs;
         font-size: $font-size-xs;
-        
+
         a {
           color: rgba(255, 255, 255, 0.9);
-          
+
           &:hover {
             color: $color-white;
           }
         }
-        
+
         .divider {
           margin: 0 $spacing-xs;
           opacity: 0.5;
@@ -296,19 +304,28 @@ const footerLinks = ref(mobileFooterLinks)
       }
     }
   }
-  
+
   .close-btn {
-    padding: $spacing-xs;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
     background: rgba(255, 255, 255, 0.2);
     border: none;
-    border-radius: $radius-round;
+    border-radius: 50%;
     color: $color-white;
     cursor: pointer;
-    
+    flex-shrink: 0;
+
     .el-icon {
       font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    
+
     &:active {
       background: rgba(255, 255, 255, 0.3);
     }
@@ -321,24 +338,24 @@ const footerLinks = ref(mobileFooterLinks)
   grid-template-columns: repeat(4, 1fr);
   padding: $spacing-md;
   border-bottom: 8px solid $bg-primary;
-  
+
   .quick-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: $spacing-sm;
     color: $color-text-primary;
-    
+
     .el-icon {
       font-size: 24px;
       margin-bottom: $spacing-xs;
       color: $jd-red;
     }
-    
+
     span {
       font-size: $font-size-xs;
     }
-    
+
     &:active {
       background: $bg-primary;
       border-radius: $radius-md;
@@ -351,7 +368,7 @@ const footerLinks = ref(mobileFooterLinks)
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  
+
   .category-title {
     padding: $spacing-sm $spacing-md;
     font-size: $font-size-sm;
@@ -361,48 +378,48 @@ const footerLinks = ref(mobileFooterLinks)
     position: sticky;
     top: 0;
   }
-  
+
   .category-item {
     border-bottom: 1px solid $border-light;
-    
+
     .category-main {
       display: flex;
       align-items: center;
       justify-content: space-between;
       padding: $spacing-md;
       cursor: pointer;
-      
+
       &:active {
         background: $bg-primary;
       }
-      
+
       .cat-name {
         font-size: $font-size-sm;
         color: $color-text-primary;
       }
-      
+
       .arrow {
         font-size: 14px;
         color: $color-text-placeholder;
         transition: transform $transition-fast;
-        
+
         &.expanded {
           transform: rotate(180deg);
         }
       }
     }
-    
+
     .category-sub {
       background: $bg-primary;
       padding: $spacing-sm $spacing-md;
-      
+
       .sub-group {
         margin-bottom: $spacing-sm;
-        
+
         &:last-child {
           margin-bottom: 0;
         }
-        
+
         .sub-title {
           display: block;
           font-size: $font-size-xs;
@@ -410,12 +427,12 @@ const footerLinks = ref(mobileFooterLinks)
           color: $color-text-secondary;
           margin-bottom: $spacing-xs;
         }
-        
+
         .sub-links {
           display: flex;
           flex-wrap: wrap;
           gap: $spacing-xs;
-          
+
           a {
             display: inline-block;
             padding: $spacing-xs $spacing-sm;
@@ -423,7 +440,7 @@ const footerLinks = ref(mobileFooterLinks)
             color: $color-text-secondary;
             background: $color-white;
             border-radius: $radius-sm;
-            
+
             &:active {
               color: $jd-red;
               background: rgba($jd-red, 0.1);
@@ -442,22 +459,22 @@ const footerLinks = ref(mobileFooterLinks)
   padding: $spacing-md;
   border-top: 1px solid $border-light;
   background: $color-white;
-  
+
   .footer-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     color: $color-text-secondary;
-    
+
     .el-icon {
       font-size: 20px;
       margin-bottom: $spacing-xs;
     }
-    
+
     span {
       font-size: $font-size-xs;
     }
-    
+
     &:active {
       color: $jd-red;
     }

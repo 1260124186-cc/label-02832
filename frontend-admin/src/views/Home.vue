@@ -2,7 +2,7 @@
   <div class="home-page">
     <!-- 头部导航 - 首屏必须立即加载 -->
     <Header />
-    
+
     <!-- 主体内容 -->
     <main class="main-content">
       <!-- 轮播图区域 - 首屏重要内容，使用 Suspense 包裹 -->
@@ -14,7 +14,7 @@
           <Skeleton variant="banner" />
         </template>
       </Suspense>
-      
+
       <!-- 分类导航 - 懒加载 -->
       <Suspense>
         <template #default>
@@ -25,7 +25,7 @@
           <Skeleton variant="category-nav" />
         </template>
       </Suspense>
-      
+
       <!-- 限时秒杀 - 懒加载 -->
       <div ref="flashSaleRef" class="lazy-section">
         <Suspense>
@@ -50,7 +50,7 @@
           </template>
         </Suspense>
       </div>
-      
+
       <!-- 品牌专区 - 懒加载 -->
       <div ref="brandRef" class="lazy-section">
         <Suspense>
@@ -75,7 +75,7 @@
           </template>
         </Suspense>
       </div>
-      
+
       <!-- 商品推荐 - 懒加载 -->
       <div ref="productRef" class="lazy-section">
         <Suspense>
@@ -101,12 +101,12 @@
         </Suspense>
       </div>
     </main>
-    
+
     <!-- 页脚 - 懒加载 -->
     <div ref="footerRef" class="lazy-section">
       <Footer v-if="visibleSections.footer" />
     </div>
-    
+
     <!-- 回到顶部 -->
     <transition name="fade">
       <div v-if="showBackTop" class="back-to-top" @click="scrollToTop">
@@ -161,7 +161,7 @@ const createSectionObserver = () => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           const target = entry.target
-          
+
           // 根据目标元素设置对应模块可见
           if (target === flashSaleRef.value) {
             visibleSections.flashSale = true
@@ -172,7 +172,7 @@ const createSectionObserver = () => {
           } else if (target === footerRef.value) {
             visibleSections.footer = true
           }
-          
+
           // 加载后停止观察
           sectionObserver.unobserve(target)
         }
@@ -197,11 +197,14 @@ const scrollToTop = () => {
 }
 
 onMounted(() => {
+  // 页面加载时滚动到顶部
+  window.scrollTo(0, 0)
+
   window.addEventListener('scroll', handleScroll)
-  
+
   // 创建并启动区域观察器
   createSectionObserver()
-  
+
   // 开始观察各个懒加载区域
   if (flashSaleRef.value) sectionObserver.observe(flashSaleRef.value)
   if (brandRef.value) sectionObserver.observe(brandRef.value)
@@ -211,7 +214,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
-  
+
   // 清理观察器
   if (sectionObserver) {
     sectionObserver.disconnect()
@@ -238,7 +241,7 @@ onUnmounted(() => {
 .section-skeleton {
   padding: $spacing-lg 0;
   background: $bg-primary;
-  
+
   .container {
     max-width: $container-width;
     margin: 0 auto;
@@ -262,11 +265,11 @@ onUnmounted(() => {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: $spacing-md;
-    
+
     @include respond-to(lg) {
       grid-template-columns: repeat(2, 1fr);
     }
-    
+
     @include respond-to(md) {
       grid-template-columns: 1fr;
     }
@@ -281,15 +284,15 @@ onUnmounted(() => {
     background: $color-white;
     border-radius: $radius-lg;
     padding: $spacing-md;
-    
+
     @include respond-to(lg) {
       grid-template-columns: repeat(4, 1fr);
     }
-    
+
     @include respond-to(md) {
       grid-template-columns: repeat(3, 1fr);
     }
-    
+
     @include respond-to(sm) {
       grid-template-columns: repeat(2, 1fr);
     }
@@ -311,16 +314,16 @@ onUnmounted(() => {
   cursor: pointer;
   transition: all $transition-fast;
   z-index: $z-index-fixed;
-  
+
   .el-icon {
     font-size: 20px;
     color: $color-text-secondary;
   }
-  
+
   &:hover {
     background: $jd-red;
     border-color: $jd-red;
-    
+
     .el-icon {
       color: $color-white;
     }

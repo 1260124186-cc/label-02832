@@ -25,18 +25,15 @@ import MobileNav from './MobileNav.vue'
 }
 
 .search-bar-wrapper {
-  display: flex;
-  align-items: center;
+  display: block; // 桌面端默认 block
   background: $color-white;
-  
-  // 移动端显示汉堡菜单
+
+  // 平板和移动端使用 flex 布局显示汉堡菜单
   @include respond-to(md) {
-    padding-left: $spacing-sm;
-  }
-  
-  // 桌面端不需要额外样式
-  @include respond-to(lg) {
-    display: block;
+    display: flex;
+    align-items: center; // 垂直居中对齐
+    padding: $spacing-xs $spacing-sm;
+    flex-wrap: wrap;
   }
 }
 </style>
