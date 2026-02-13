@@ -10,11 +10,27 @@
   max-width: $container-width;
   margin: 0 auto;
   padding: 0 $container-padding;
+  
+  @include respond-to(md) {
+    padding: 0 $spacing-sm;
+  }
+  
+  @include respond-to(sm) {
+    padding: 0 $spacing-xs;
+  }
 }
 
 .container-fluid {
   width: 100%;
   padding: 0 $container-padding;
+  
+  @include respond-to(md) {
+    padding: 0 $spacing-sm;
+  }
+  
+  @include respond-to(sm) {
+    padding: 0 $spacing-xs;
+  }
 }
 
 // 区块样式

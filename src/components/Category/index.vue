@@ -28,22 +28,15 @@ import {
 } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
 
+// 从 mock 数据导入分类数据
+import { quickCategories } from '@/mock/categories'
+
 const handleClick = () => {
   showDevelopingToast()
 }
 
-const categories = ref([
-  { id: 1, name: '京东超市', icon: 'ShoppingCart', bgColor: 'linear-gradient(135deg, #ff6b6b, #ee5a5a)' },
-  { id: 2, name: '数码电器', icon: 'Monitor', bgColor: 'linear-gradient(135deg, #4ecdc4, #44a08d)' },
-  { id: 3, name: '京东服饰', icon: 'Brush', bgColor: 'linear-gradient(135deg, #a18cd1, #fbc2eb)' },
-  { id: 4, name: '京东生鲜', icon: 'Food', bgColor: 'linear-gradient(135deg, #84fab0, #8fd3f4)' },
-  { id: 5, name: '京东到家', icon: 'Van', bgColor: 'linear-gradient(135deg, #f093fb, #f5576c)' },
-  { id: 6, name: '充值缴费', icon: 'CreditCard', bgColor: 'linear-gradient(135deg, #5ee7df, #b490ca)' },
-  { id: 7, name: '9.9元拼', icon: 'Ticket', bgColor: 'linear-gradient(135deg, #fa709a, #fee140)' },
-  { id: 8, name: '领券中心', icon: 'Present', bgColor: 'linear-gradient(135deg, #a8edea, #fed6e3)' },
-  { id: 9, name: '京东国际', icon: 'Van', bgColor: 'linear-gradient(135deg, #667eea, #764ba2)' },
-  { id: 10, name: '拍卖', icon: 'Camera', bgColor: 'linear-gradient(135deg, #f6d365, #fda085)' }
-])
+// 使用 mock 数据
+const categories = ref(quickCategories)
 </script>
 
 <style lang="scss" scoped>
@@ -55,6 +48,10 @@ const categories = ref([
     max-width: $container-width;
     margin: 0 auto;
     padding: 0 $spacing-md;
+    
+    @include respond-to(sm) {
+      padding: 0 $spacing-sm;
+    }
   }
 }
 
@@ -67,16 +64,32 @@ const categories = ref([
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
   
-  @include respond-to(lg) {
+  @include respond-to(xl) {
     grid-template-columns: repeat(5, 1fr);
   }
   
+  @include respond-to(lg) {
+    grid-template-columns: repeat(5, 1fr);
+    gap: $spacing-sm;
+    padding: $spacing-md;
+  }
+  
   @include respond-to(md) {
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(5, 1fr);
+    gap: $spacing-sm;
+    padding: $spacing-sm;
   }
   
   @include respond-to(sm) {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(5, 1fr);
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+    border-radius: $radius-md;
+  }
+  
+  @include respond-to(xs) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: $spacing-xs;
   }
 }
 
@@ -87,6 +100,7 @@ const categories = ref([
   padding: $spacing-sm;
   border-radius: $radius-md;
   transition: all $transition-fast;
+  min-width: 0; // 防止内容溢出
   
   &:hover {
     background: $bg-primary;
@@ -94,6 +108,13 @@ const categories = ref([
     
     .icon-wrap {
       transform: scale(1.1);
+    }
+  }
+  
+  // 移动端禁用hover效果的transform
+  @include respond-to(md) {
+    &:hover {
+      transform: none;
     }
   }
   
@@ -105,6 +126,30 @@ const categories = ref([
     color: $color-white;
     margin-bottom: $spacing-sm;
     transition: transform $transition-fast;
+    
+    @include respond-to(md) {
+      width: 44px;
+      height: 44px;
+    }
+    
+    @include respond-to(sm) {
+      width: 40px;
+      height: 40px;
+      
+      .el-icon {
+        font-size: 22px !important;
+      }
+    }
+    
+    @include respond-to(xs) {
+      width: 36px;
+      height: 36px;
+      margin-bottom: $spacing-xs;
+      
+      .el-icon {
+        font-size: 20px !important;
+      }
+    }
   }
   
   .name {
@@ -112,6 +157,15 @@ const categories = ref([
     color: $color-text-primary;
     text-align: center;
     @include ellipsis;
+    max-width: 100%;
+    
+    @include respond-to(sm) {
+      font-size: 11px;
+    }
+    
+    @include respond-to(xs) {
+      font-size: 10px;
+    }
   }
 }
 </style>

@@ -34,7 +34,7 @@
             v-for="word in hotWords" 
             :key="word" 
             href="#"
-            @click.prevent="searchKeyword = word"
+            @click.prevent="selectHotWord(word)"
           >
             {{ word }}
           </a>
@@ -51,7 +51,7 @@
               v-for="item in searchHistory" 
               :key="item" 
               href="#"
-              @click.prevent="searchKeyword = item"
+              @click.prevent="selectHistory(item)"
             >
               {{ item }}
             </a>
@@ -98,39 +98,130 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Search, ShoppingCart, ShoppingCartFull, Close } from '@element-plus/icons-vue'
-import { showDevelopingToast } from '@/utils/toast'
+import { showDevelopingToast, showErrorToast } from '@/utils/toast'
 import { useCartStore } from '@/stores/cart'
+import { createLogger } from '@/utils/logger'
+
+// 从 mock 数据导入
+import { hotSearchWords, defaultSearchHistory } from '@/mock/banner'
+
+// 创建日志记录器
+const logger = createLogger('SearchBar')
+
+// 搜索配置
+const SEARCH_CONFIG = {
+  minLength: 1,        // 最小搜索长度
+  maxLength: 100,      // 最大搜索长度
+  maxHistoryItems: 10  // 最大历史记录数
+}
 
 const cartStore = useCartStore()
 
 const searchKeyword = ref('')
 const showHistory = ref(false)
-const searchHistory = ref(['iPhone 15', '笔记本电脑', '机械键盘'])
-const hotWords = ref(['iPhone 15', '华为Mate60', '笔记本', '空调', '冰箱', '洗衣机'])
+const searchError = ref('')
+
+// 使用 mock 数据
+const searchHistory = ref([...defaultSearchHistory])
+const hotWords = ref(hotSearchWords)
+
+// 输入校验
+const validateSearchInput = (keyword) => {
+  const trimmed = keyword.trim()
+  
+  // 空输入校验
+  if (!trimmed) {
+    return { valid: false, error: '请输入搜索关键词' }
+  }
+  
+  // 长度校验
+  if (trimmed.length < SEARCH_CONFIG.minLength) {
+    return { valid: false, error: `搜索关键词至少需要${SEARCH_CONFIG.minLength}个字符` }
+  }
+  
+  if (trimmed.length > SEARCH_CONFIG.maxLength) {
+    return { valid: false, error: `搜索关键词不能超过${SEARCH_CONFIG.maxLength}个字符` }
+  }
+  
+  // 特殊字符校验（可选，根据需求调整）
+  const invalidChars = /[<>]/
+  if (invalidChars.test(trimmed)) {
+    return { valid: false, error: '搜索关键词包含非法字符' }
+  }
+  
+  return { valid: true, error: '', value: trimmed }
+}
+
+// 计算属性：是否可以搜索
+const canSearch = computed(() => {
+  return searchKeyword.value.trim().length >= SEARCH_CONFIG.minLength
+})
 
 const handleSearch = () => {
-  if (searchKeyword.value.trim()) {
-    // 添加到搜索历史
-    if (!searchHistory.value.includes(searchKeyword.value)) {
-      searchHistory.value.unshift(searchKeyword.value)
-      if (searchHistory.value.length > 10) {
-        searchHistory.value.pop()
-      }
-    }
-    showHistory.value = false
-    showDevelopingToast()
+  logger.debug('触发搜索', { keyword: searchKeyword.value })
+  
+  // 输入校验
+  const validation = validateSearchInput(searchKeyword.value)
+  
+  if (!validation.valid) {
+    logger.warn('搜索校验失败', { error: validation.error })
+    searchError.value = validation.error
+    showErrorToast(validation.error)
+    return
   }
+  
+  // 清除错误状态
+  searchError.value = ''
+  const keyword = validation.value
+  
+  logger.info('执行搜索', { keyword })
+  
+  // 添加到搜索历史
+  if (!searchHistory.value.includes(keyword)) {
+    searchHistory.value.unshift(keyword)
+    logger.debug('添加到搜索历史', { keyword })
+    
+    // 限制历史记录数量
+    if (searchHistory.value.length > SEARCH_CONFIG.maxHistoryItems) {
+      const removed = searchHistory.value.pop()
+      logger.debug('移除旧的历史记录', { removed })
+    }
+  }
+  
+  showHistory.value = false
+  showDevelopingToast()
+}
+
+// 选择热门搜索词
+const selectHotWord = (word) => {
+  logger.debug('选择热门搜索词', { word })
+  searchKeyword.value = word
+  searchError.value = ''
+}
+
+// 选择历史记录
+const selectHistory = (item) => {
+  logger.debug('选择历史记录', { item })
+  searchKeyword.value = item
+  searchError.value = ''
 }
 
 const clearHistory = () => {
+  logger.info('清空搜索历史', { count: searchHistory.value.length })
   searchHistory.value = []
 }
 
 const handleClick = () => {
   showDevelopingToast()
 }
+
+// 组件初始化日志
+logger.debug('SearchBar 组件初始化', { 
+  hotWordsCount: hotWords.value.length,
+  historyCount: searchHistory.value.length 
+})
 </script>
 
 <style lang="scss" scoped>
@@ -138,12 +229,21 @@ const handleClick = () => {
   background: $color-white;
   padding: $spacing-md 0;
   
+  @include respond-to(sm) {
+    padding: $spacing-sm 0;
+  }
+  
   .container {
     display: flex;
     align-items: center;
     max-width: $container-width;
     margin: 0 auto;
     padding: 0 $spacing-md;
+    
+    @include respond-to(sm) {
+      padding: 0 $spacing-sm;
+      flex-wrap: wrap;
+    }
   }
 }
 
@@ -151,6 +251,18 @@ const handleClick = () => {
 .logo {
   flex-shrink: 0;
   margin-right: $spacing-xl;
+  
+  @include respond-to(lg) {
+    margin-right: $spacing-lg;
+  }
+  
+  @include respond-to(md) {
+    margin-right: $spacing-md;
+  }
+  
+  @include respond-to(sm) {
+    margin-right: $spacing-sm;
+  }
   
   a {
     display: block;
@@ -165,6 +277,14 @@ const handleClick = () => {
       font-weight: $font-weight-bold;
       color: $jd-red;
       letter-spacing: -2px;
+      
+      @include respond-to(md) {
+        font-size: 28px;
+      }
+      
+      @include respond-to(sm) {
+        font-size: 24px;
+      }
     }
     
     .logo-slogan {
@@ -172,6 +292,14 @@ const handleClick = () => {
       color: $jd-red;
       margin-left: $spacing-xs;
       font-weight: $font-weight-medium;
+      
+      @include respond-to(md) {
+        font-size: $font-size-base;
+      }
+      
+      @include respond-to(sm) {
+        display: none; // 小屏幕隐藏slogan
+      }
     }
   }
 }
@@ -181,6 +309,14 @@ const handleClick = () => {
   flex: 1;
   position: relative;
   max-width: 550px;
+  min-width: 0; // 防止flex子元素溢出
+  
+  @include respond-to(sm) {
+    max-width: none;
+    order: 3; // 移动端搜索框放到最后一行
+    width: 100%;
+    margin-top: $spacing-sm;
+  }
   
   .search-input-wrap {
     display: flex;
@@ -195,6 +331,13 @@ const handleClick = () => {
       font-size: $font-size-base;
       border: none;
       outline: none;
+      min-width: 0; // 允许收缩
+      
+      @include respond-to(md) {
+        height: 36px;
+        padding: 0 $spacing-sm;
+        font-size: $font-size-sm;
+      }
       
       &::placeholder {
         color: $color-text-placeholder;
@@ -212,9 +355,27 @@ const handleClick = () => {
       border: none;
       cursor: pointer;
       transition: background $transition-fast;
+      flex-shrink: 0;
+      
+      @include respond-to(md) {
+        width: 60px;
+        height: 36px;
+        
+        span {
+          display: none; // 平板端只显示图标
+        }
+      }
+      
+      @include respond-to(sm) {
+        width: 50px;
+      }
       
       .el-icon {
         margin-right: 4px;
+        
+        @include respond-to(md) {
+          margin-right: 0;
+        }
       }
       
       &:hover {
@@ -229,12 +390,23 @@ const handleClick = () => {
   
   .hot-words {
     margin-top: $spacing-sm;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    
+    @include respond-to(sm) {
+      display: none; // 小屏幕隐藏热门搜索
+    }
     
     a {
       display: inline-block;
       margin-right: $spacing-md;
       font-size: $font-size-xs;
       color: $color-text-secondary;
+      
+      @include respond-to(md) {
+        margin-right: $spacing-sm;
+      }
       
       &:hover {
         color: $jd-red;
@@ -256,6 +428,14 @@ const handleClick = () => {
     border-top: none;
     box-shadow: $shadow-md;
     z-index: $z-index-dropdown;
+    
+    @include respond-to(md) {
+      right: 60px;
+    }
+    
+    @include respond-to(sm) {
+      right: 50px;
+    }
     
     .history-header {
       @include flex-between;
@@ -296,6 +476,10 @@ const handleClick = () => {
   margin-left: auto; // 关键：使用auto推到最右侧
   flex-shrink: 0;
   
+  @include respond-to(sm) {
+    margin-left: $spacing-sm;
+  }
+  
   .cart-btn {
     display: flex;
     align-items: center;
@@ -307,9 +491,23 @@ const handleClick = () => {
     transition: all $transition-fast;
     white-space: nowrap;
     
+    @include respond-to(md) {
+      padding: $spacing-xs $spacing-sm;
+    }
+    
     .el-icon {
       font-size: 18px;
       margin-right: $spacing-xs;
+      
+      @include respond-to(sm) {
+        margin-right: 0;
+      }
+    }
+    
+    span:not(.cart-count) {
+      @include respond-to(sm) {
+        display: none; // 小屏幕隐藏文字
+      }
     }
     
     .cart-count {
@@ -321,6 +519,13 @@ const handleClick = () => {
       border-radius: 10px;
       min-width: 20px;
       text-align: center;
+      
+      @include respond-to(sm) {
+        margin-left: $spacing-xs;
+        padding: 0 4px;
+        min-width: 16px;
+        font-size: 10px;
+      }
     }
     
     &:hover {
@@ -340,25 +545,46 @@ const handleClick = () => {
     box-shadow: $shadow-lg;
     z-index: $z-index-dropdown;
     
+    @include respond-to(sm) {
+      width: 280px;
+      right: -$spacing-sm;
+    }
+    
     .cart-empty {
       padding: $spacing-xl;
       text-align: center;
+      
+      @include respond-to(sm) {
+        padding: $spacing-lg;
+      }
       
       .empty-icon {
         font-size: 48px;
         color: $color-text-placeholder;
         margin-bottom: $spacing-md;
+        
+        @include respond-to(sm) {
+          font-size: 36px;
+        }
       }
       
       p {
         font-size: $font-size-sm;
         color: $color-text-secondary;
+        
+        @include respond-to(sm) {
+          font-size: $font-size-xs;
+        }
       }
     }
     
     .cart-list {
       max-height: 400px;
       overflow-y: auto;
+      
+      @include respond-to(sm) {
+        max-height: 300px;
+      }
     }
     
     .cart-item {
@@ -366,6 +592,10 @@ const handleClick = () => {
       align-items: center;
       padding: $spacing-sm $spacing-md;
       border-bottom: 1px solid $border-light;
+      
+      @include respond-to(sm) {
+        padding: $spacing-xs $spacing-sm;
+      }
       
       &:hover {
         background: $bg-primary;
@@ -381,6 +611,11 @@ const handleClick = () => {
         object-fit: cover;
         border-radius: $radius-sm;
         background: $bg-primary;
+        
+        @include respond-to(sm) {
+          width: 50px;
+          height: 50px;
+        }
       }
       
       .item-info {
@@ -416,6 +651,10 @@ const handleClick = () => {
         cursor: pointer;
         transition: opacity $transition-fast;
         
+        @include respond-to(sm) {
+          opacity: 1; // 移动端始终显示删除按钮
+        }
+        
         &:hover {
           color: $jd-red;
         }
@@ -426,6 +665,12 @@ const handleClick = () => {
       @include flex-between;
       padding: $spacing-md;
       background: $bg-primary;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+      
+      @include respond-to(sm) {
+        padding: $spacing-sm;
+      }
       
       .total {
         font-size: $font-size-xs;
@@ -436,6 +681,10 @@ const handleClick = () => {
         color: $jd-red;
         font-size: $font-size-lg;
         font-weight: $font-weight-bold;
+        
+        @include respond-to(sm) {
+          font-size: $font-size-base;
+        }
       }
       
       .checkout-btn {
@@ -446,6 +695,11 @@ const handleClick = () => {
         border-radius: $radius-md;
         cursor: pointer;
         transition: background $transition-fast;
+        
+        @include respond-to(sm) {
+          padding: $spacing-xs $spacing-sm;
+          font-size: $font-size-xs;
+        }
         
         &:hover {
           background: $jd-red-dark;

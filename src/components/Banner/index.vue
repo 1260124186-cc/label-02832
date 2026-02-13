@@ -29,43 +29,56 @@
         </div>
         
         <!-- 中间轮播图 -->
-        <div class="main-carousel">
-          <div class="carousel-container">
+        <div 
+          class="main-carousel"
+          @mouseenter="pauseAutoPlay"
+          @mouseleave="resumeAutoPlay"
+        >
+          <!-- 轮播图为空时的占位 -->
+          <div v-if="!hasSlides" class="carousel-empty">
+            <el-icon :size="48"><Present /></el-icon>
+            <p>暂无轮播内容</p>
+          </div>
+          
+          <!-- 轮播图内容 -->
+          <div v-else class="carousel-container">
             <div 
               class="carousel-track" 
               :style="{ transform: `translateX(-${currentSlide * 100}%)` }"
             >
               <div 
                 v-for="(slide, index) in slides" 
-                :key="index" 
+                :key="slide.id || index" 
                 class="carousel-slide"
-                :style="{ background: slide.bgColor }"
+                :style="{ background: slide.bgColor || '#e1251b' }"
               >
                 <div class="slide-content">
                   <div class="slide-text">
-                    <h2>{{ slide.title }}</h2>
-                    <p>{{ slide.subtitle }}</p>
-                    <button class="slide-btn" @click="handleClick">{{ slide.btnText }}</button>
+                    <h2>{{ slide.title || '欢迎来到京东' }}</h2>
+                    <p>{{ slide.subtitle || '' }}</p>
+                    <button class="slide-btn" @click="handleClick">{{ slide.btnText || '立即查看' }}</button>
                   </div>
                   <div class="slide-image">
-                    <div class="image-placeholder" :style="{ background: slide.imgBg }">
-                      <el-icon :size="60"><component :is="slide.icon" /></el-icon>
+                    <div class="image-placeholder" :style="{ background: slide.imgBg || 'rgba(255,255,255,0.1)' }">
+                      <el-icon :size="60"><component :is="slide.icon || 'Present'" /></el-icon>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
             
-            <!-- 轮播控制 -->
-            <button class="carousel-btn prev" @click="prevSlide">
-              <el-icon><ArrowLeft /></el-icon>
-            </button>
-            <button class="carousel-btn next" @click="nextSlide">
-              <el-icon><ArrowRight /></el-icon>
-            </button>
+            <!-- 轮播控制（仅多张时显示） -->
+            <template v-if="slides.length > 1">
+              <button class="carousel-btn prev" @click="prevSlide">
+                <el-icon><ArrowLeft /></el-icon>
+              </button>
+              <button class="carousel-btn next" @click="nextSlide">
+                <el-icon><ArrowRight /></el-icon>
+              </button>
+            </template>
             
-            <!-- 轮播指示器 -->
-            <div class="carousel-dots">
+            <!-- 轮播指示器（仅多张时显示） -->
+            <div v-if="slides.length > 1" class="carousel-dots">
               <span 
                 v-for="(_, index) in slides" 
                 :key="index"
@@ -123,204 +136,232 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { 
   ArrowRight, ArrowLeft, User, Iphone, Monitor, 
   HomeFilled, ShoppingCart, Ticket, Service, 
   CreditCard, Van, Present, Goods
 } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
+import { createLogger } from '@/utils/logger'
+
+// 从 mock 数据导入
+import { sideCategories as mockSideCategories } from '@/mock/categories'
+import { 
+  slides as mockSlides, 
+  newsList as mockNewsList, 
+  services as mockServices 
+} from '@/mock/banner'
+
+// 创建日志记录器
+const logger = createLogger('Banner')
+
+// 轮播图配置
+const CAROUSEL_CONFIG = {
+  autoPlayInterval: 4000,  // 自动播放间隔（毫秒）
+  minSlides: 1,            // 最少轮播图数量
+  maxRetries: 3            // 最大重试次数
+}
 
 const currentSlide = ref(0)
 const activeSideCategory = ref(-1)
+const isPlaying = ref(false)
+const hasError = ref(false)
 let autoPlayTimer = null
 
 const handleClick = () => {
   showDevelopingToast()
 }
 
-const slides = ref([
-  {
-    title: 'iPhone 15 Pro Max',
-    subtitle: '钛金属设计，A17 Pro芯片',
-    btnText: '立即抢购',
-    bgColor: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-    imgBg: 'rgba(255,255,255,0.1)',
-    icon: 'Iphone'
-  },
-  {
-    title: '京东超级品牌日',
-    subtitle: '大牌狂欢，低至5折',
-    btnText: '查看详情',
-    bgColor: 'linear-gradient(135deg, #e1251b 0%, #c81623 100%)',
-    imgBg: 'rgba(255,255,255,0.2)',
-    icon: 'Present'
-  },
-  {
-    title: '家电焕新季',
-    subtitle: '以旧换新，补贴高达1000元',
-    btnText: '立即参与',
-    bgColor: 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)',
-    imgBg: 'rgba(255,255,255,0.1)',
-    icon: 'HomeFilled'
-  },
-  {
-    title: '电脑数码节',
-    subtitle: '游戏本直降2000，限时特惠',
-    btnText: '马上抢',
-    bgColor: 'linear-gradient(135deg, #0984e3 0%, #74b9ff 100%)',
-    imgBg: 'rgba(255,255,255,0.15)',
-    icon: 'Monitor'
+// 使用 mock 数据（带边界检查）
+const slides = ref([])
+const sideCategories = ref([])
+const newsList = ref([])
+const services = ref([])
+
+// 初始化数据（带错误处理）
+const initializeData = () => {
+  logger.debug('初始化 Banner 数据')
+  
+  try {
+    // 轮播图数据
+    if (Array.isArray(mockSlides) && mockSlides.length >= CAROUSEL_CONFIG.minSlides) {
+      slides.value = mockSlides
+      logger.info('轮播图数据加载成功', { count: mockSlides.length })
+    } else {
+      logger.warn('轮播图数据无效或为空，使用默认占位数据')
+      slides.value = [{
+        id: 0,
+        title: '欢迎来到京东',
+        subtitle: '品质生活，从这里开始',
+        btnText: '立即探索',
+        bgColor: 'linear-gradient(135deg, #e1251b 0%, #c81623 100%)',
+        imgBg: 'rgba(255,255,255,0.2)',
+        icon: 'Present'
+      }]
+    }
+    
+    // 侧边分类数据
+    if (Array.isArray(mockSideCategories) && mockSideCategories.length > 0) {
+      sideCategories.value = mockSideCategories
+      logger.debug('侧边分类数据加载成功', { count: mockSideCategories.length })
+    } else {
+      logger.warn('侧边分类数据为空')
+      sideCategories.value = []
+    }
+    
+    // 快报数据
+    if (Array.isArray(mockNewsList) && mockNewsList.length > 0) {
+      newsList.value = mockNewsList
+      logger.debug('快报数据加载成功', { count: mockNewsList.length })
+    } else {
+      logger.warn('快报数据为空')
+      newsList.value = []
+    }
+    
+    // 服务数据
+    if (Array.isArray(mockServices) && mockServices.length > 0) {
+      services.value = mockServices
+      logger.debug('服务数据加载成功', { count: mockServices.length })
+    } else {
+      logger.warn('服务数据为空')
+      services.value = []
+    }
+    
+    hasError.value = false
+  } catch (error) {
+    logger.error('初始化数据失败', error)
+    hasError.value = true
   }
-])
+}
 
-const sideCategories = ref([
-  { 
-    id: 1, 
-    name: '手机/数码/配件',
-    children: [
-      { title: '手机通讯', links: ['手机', '游戏手机', '拍照手机', '5G手机', '老人机', '对讲机'] },
-      { title: '手机配件', links: ['手机壳', '贴膜', '充电器', '数据线', '移动电源', '手机支架'] },
-      { title: '智能设备', links: ['智能手表', '智能手环', '智能眼镜', 'VR设备', '智能家居'] },
-      { title: '数码配件', links: ['存储卡', '读卡器', '数码相框', '录音笔', '电子词典'] }
-    ]
-  },
-  { 
-    id: 2, 
-    name: '电脑/办公/外设',
-    children: [
-      { title: '电脑整机', links: ['笔记本', '游戏本', '台式机', '一体机', '服务器', '工作站'] },
-      { title: '电脑配件', links: ['显卡', 'CPU', '主板', '内存', '硬盘', '机箱', '电源'] },
-      { title: '外设产品', links: ['键盘', '鼠标', '显示器', '音箱', '耳机', '摄像头', '麦克风'] },
-      { title: '办公设备', links: ['打印机', '投影仪', '扫描仪', '复印机', '碎纸机', '考勤机'] }
-    ]
-  },
-  { 
-    id: 3, 
-    name: '家用电器',
-    children: [
-      { title: '大家电', links: ['电视', '空调', '冰箱', '洗衣机', '热水器', '油烟机'] },
-      { title: '厨房电器', links: ['电饭煲', '微波炉', '电磁炉', '烤箱', '榨汁机', '豆浆机'] },
-      { title: '生活电器', links: ['吸尘器', '空气净化器', '加湿器', '电风扇', '取暖器', '扫地机器人'] },
-      { title: '个护健康', links: ['剃须刀', '电吹风', '美容仪', '按摩器', '体重秤', '血压计'] }
-    ]
-  },
-  { 
-    id: 4, 
-    name: '家居/家具/家装',
-    children: [
-      { title: '家纺', links: ['四件套', '被子', '枕头', '毛巾', '窗帘', '地毯', '凉席'] },
-      { title: '家具', links: ['沙发', '床', '餐桌', '衣柜', '书桌', '鞋柜', '茶几'] },
-      { title: '灯具', links: ['吸顶灯', '吊灯', '台灯', '落地灯', '射灯', '壁灯'] },
-      { title: '家装建材', links: ['瓷砖', '地板', '油漆', '壁纸', '五金', '开关插座'] }
-    ]
-  },
-  { 
-    id: 5, 
-    name: '男装/女装/内衣',
-    children: [
-      { title: '男装', links: ['T恤', '衬衫', '外套', '夹克', '牛仔裤', '休闲裤', '西装'] },
-      { title: '女装', links: ['连衣裙', '半身裙', '衬衫', '外套', '毛衣', '卫衣', '羽绒服'] },
-      { title: '内衣', links: ['文胸', '内裤', '保暖内衣', '睡衣', '家居服', '袜子'] },
-      { title: '配饰', links: ['帽子', '围巾', '手套', '腰带', '领带', '太阳镜'] }
-    ]
-  },
-  { 
-    id: 6, 
-    name: '美妆/护肤/个护',
-    children: [
-      { title: '护肤', links: ['洁面', '化妆水', '乳液', '面霜', '精华', '面膜', '眼霜'] },
-      { title: '彩妆', links: ['口红', '粉底', '眼影', '腮红', '眉笔', '睫毛膏', '卸妆'] },
-      { title: '香水', links: ['女士香水', '男士香水', '中性香水', '香水套装', '车载香薰'] },
-      { title: '个人护理', links: ['洗发水', '沐浴露', '牙膏', '牙刷', '漱口水', '身体乳'] }
-    ]
-  },
-  { 
-    id: 7, 
-    name: '运动/户外/鞋靴',
-    children: [
-      { title: '运动鞋', links: ['跑步鞋', '篮球鞋', '足球鞋', '休闲鞋', '板鞋', '帆布鞋'] },
-      { title: '运动服饰', links: ['运动套装', '运动T恤', '运动裤', '瑜伽服', '泳装'] },
-      { title: '户外装备', links: ['冲锋衣', '帐篷', '睡袋', '登山杖', '户外鞋', '背包'] },
-      { title: '健身器材', links: ['跑步机', '动感单车', '哑铃', '瑜伽垫', '拉力器', '仰卧板'] }
-    ]
-  },
-  { 
-    id: 8, 
-    name: '食品/生鲜/酒水',
-    children: [
-      { title: '零食', links: ['坚果', '饼干', '糖果', '巧克力', '蜜饯', '肉干', '膨化食品'] },
-      { title: '酒水', links: ['白酒', '红酒', '啤酒', '洋酒', '黄酒', '清酒', '果酒'] },
-      { title: '生鲜', links: ['水果', '蔬菜', '肉类', '海鲜', '蛋奶', '豆制品'] },
-      { title: '饮料冲调', links: ['牛奶', '咖啡', '茶叶', '果汁', '矿泉水', '功能饮料'] }
-    ]
-  },
-  { 
-    id: 9, 
-    name: '母婴/玩具/童装',
-    children: [
-      { title: '奶粉辅食', links: ['婴儿奶粉', '儿童奶粉', '米粉', '果泥', '营养品'] },
-      { title: '尿裤湿巾', links: ['纸尿裤', '拉拉裤', '湿巾', '棉柔巾', '隔尿垫'] },
-      { title: '玩具', links: ['积木', '遥控车', '毛绒玩具', '益智玩具', '户外玩具', '电动玩具'] },
-      { title: '童装童鞋', links: ['婴儿服', '儿童T恤', '儿童裤子', '童鞋', '书包'] }
-    ]
-  },
-  { 
-    id: 10, 
-    name: '图书/音像/电子书',
-    children: [
-      { title: '图书', links: ['小说', '文学', '经管', '教育', '童书', '科技', '艺术'] },
-      { title: '电子书', links: ['Kindle电子书', '多看电子书', '网络文学', '有声书'] },
-      { title: '音像', links: ['音乐CD', '影视DVD', '游戏', '教育音像'] },
-      { title: '文具', links: ['笔类', '本册', '文件管理', '学生文具', '办公文具'] }
-    ]
-  }
-])
+// 计算属性：是否有轮播图
+const hasSlides = computed(() => slides.value.length > 0)
 
-const newsList = ref([
-  { id: 1, tag: '热门', tagType: 'hot', title: 'iPhone 15系列火爆预售中' },
-  { id: 2, tag: '特惠', tagType: 'sale', title: '家电以旧换新补贴来了' },
-  { id: 3, tag: '新品', tagType: 'new', title: '华为Mate60 Pro正式发布' },
-  { id: 4, tag: '活动', tagType: 'event', title: '京东超级品牌日开启' }
-])
+// 计算属性：是否有多张轮播图（需要自动播放）
+const shouldAutoPlay = computed(() => slides.value.length > 1)
 
-const services = ref([
-  { name: '话费', icon: 'Iphone' },
-  { name: '机票', icon: 'Van' },
-  { name: '充值', icon: 'CreditCard' },
-  { name: '白条', icon: 'Ticket' }
-])
-
+// 安全的轮播图切换（带边界检查）
 const nextSlide = () => {
-  currentSlide.value = (currentSlide.value + 1) % slides.value.length
+  if (!hasSlides.value) {
+    logger.warn('无法切换到下一张：轮播图为空')
+    return
+  }
+  
+  const totalSlides = slides.value.length
+  const nextIndex = (currentSlide.value + 1) % totalSlides
+  
+  logger.debug('切换到下一张', { from: currentSlide.value, to: nextIndex, total: totalSlides })
+  currentSlide.value = nextIndex
 }
 
 const prevSlide = () => {
-  currentSlide.value = (currentSlide.value - 1 + slides.value.length) % slides.value.length
+  if (!hasSlides.value) {
+    logger.warn('无法切换到上一张：轮播图为空')
+    return
+  }
+  
+  const totalSlides = slides.value.length
+  const prevIndex = (currentSlide.value - 1 + totalSlides) % totalSlides
+  
+  logger.debug('切换到上一张', { from: currentSlide.value, to: prevIndex, total: totalSlides })
+  currentSlide.value = prevIndex
 }
 
 const goToSlide = (index) => {
+  if (!hasSlides.value) {
+    logger.warn('无法跳转：轮播图为空')
+    return
+  }
+  
+  // 边界检查
+  if (index < 0 || index >= slides.value.length) {
+    logger.warn('无效的轮播图索引', { index, max: slides.value.length - 1 })
+    return
+  }
+  
+  if (index === currentSlide.value) {
+    logger.debug('已经在当前轮播图', { index })
+    return
+  }
+  
+  logger.debug('跳转到指定轮播图', { from: currentSlide.value, to: index })
   currentSlide.value = index
 }
 
+// 自动播放控制
 const startAutoPlay = () => {
+  if (!shouldAutoPlay.value) {
+    logger.debug('轮播图数量不足，跳过自动播放')
+    return
+  }
+  
+  if (isPlaying.value) {
+    logger.debug('自动播放已在运行')
+    return
+  }
+  
+  logger.info('启动自动播放', { interval: CAROUSEL_CONFIG.autoPlayInterval })
+  
   autoPlayTimer = setInterval(() => {
     nextSlide()
-  }, 4000)
+  }, CAROUSEL_CONFIG.autoPlayInterval)
+  
+  isPlaying.value = true
 }
 
 const stopAutoPlay = () => {
   if (autoPlayTimer) {
     clearInterval(autoPlayTimer)
     autoPlayTimer = null
+    isPlaying.value = false
+    logger.debug('停止自动播放')
   }
 }
 
+// 暂停自动播放（鼠标悬停时）
+const pauseAutoPlay = () => {
+  if (isPlaying.value) {
+    stopAutoPlay()
+    logger.debug('暂停自动播放（用户交互）')
+  }
+}
+
+// 恢复自动播放
+const resumeAutoPlay = () => {
+  if (shouldAutoPlay.value && !isPlaying.value) {
+    startAutoPlay()
+    logger.debug('恢复自动播放')
+  }
+}
+
+// 监听轮播图数据变化
+watch(() => slides.value.length, (newLength, oldLength) => {
+  logger.debug('轮播图数量变化', { from: oldLength, to: newLength })
+  
+  // 如果当前索引超出范围，重置到第一张
+  if (currentSlide.value >= newLength) {
+    logger.warn('当前索引超出范围，重置到第一张')
+    currentSlide.value = 0
+  }
+  
+  // 根据数量决定是否自动播放
+  if (newLength > 1 && !isPlaying.value) {
+    startAutoPlay()
+  } else if (newLength <= 1) {
+    stopAutoPlay()
+  }
+})
+
+// 生命周期
 onMounted(() => {
+  logger.info('Banner 组件挂载')
+  initializeData()
   startAutoPlay()
 })
 
 onUnmounted(() => {
+  logger.info('Banner 组件卸载')
   stopAutoPlay()
 })
 </script>
@@ -334,6 +375,10 @@ onUnmounted(() => {
     max-width: $container-width;
     margin: 0 auto;
     padding: 0 $spacing-md;
+    
+    @include respond-to(sm) {
+      padding: 0 $spacing-sm;
+    }
   }
 }
 
@@ -345,6 +390,15 @@ onUnmounted(() => {
   box-shadow: $shadow-sm;
   position: relative;
   // 移除overflow:hidden，允许分类弹窗溢出显示
+  
+  @include respond-to(lg) {
+    height: 380px;
+  }
+  
+  @include respond-to(md) {
+    flex-direction: column;
+    height: auto;
+  }
 }
 
 // 左侧分类菜单
@@ -357,6 +411,15 @@ onUnmounted(() => {
   border-radius: $radius-lg 0 0 $radius-lg;
   // 移除overflow:hidden，允许子分类浮层正常显示
   
+  @include respond-to(lg) {
+    width: 180px;
+  }
+  
+  // 平板和手机端隐藏左侧分类菜单
+  @include respond-to(md) {
+    display: none;
+  }
+  
   .category-item {
     position: relative;
     display: flex;
@@ -367,6 +430,10 @@ onUnmounted(() => {
     cursor: pointer;
     transition: background $transition-fast;
     
+    @include respond-to(lg) {
+      padding: 8px $spacing-sm;
+    }
+    
     &:hover {
       background: rgba(0, 0, 0, 0.2);
     }
@@ -374,6 +441,10 @@ onUnmounted(() => {
     .cat-name {
       font-size: $font-size-sm;
       @include ellipsis;
+      
+      @include respond-to(lg) {
+        font-size: $font-size-xs;
+      }
     }
     
     .arrow {
@@ -396,6 +467,13 @@ onUnmounted(() => {
       overflow-y: auto;
       z-index: 1000; // 提高层级
       
+      @include respond-to(lg) {
+        left: 180px;
+        width: calc(100vw - 400px);
+        max-width: 500px;
+        max-height: 380px;
+      }
+      
       .sub-group {
         margin-bottom: $spacing-md;
         padding-bottom: $spacing-sm;
@@ -416,6 +494,11 @@ onUnmounted(() => {
           color: $color-text-primary;
           line-height: 28px;
           margin-right: $spacing-sm;
+          
+          @include respond-to(lg) {
+            width: 60px;
+            font-size: $font-size-xs;
+          }
         }
         
         .sub-links {
@@ -446,6 +529,39 @@ onUnmounted(() => {
   flex: 1;
   position: relative;
   overflow: hidden;
+  min-width: 0; // 防止flex子元素溢出
+  
+  @include respond-to(md) {
+    width: 100%;
+    height: 280px;
+    border-radius: $radius-lg $radius-lg 0 0;
+  }
+  
+  @include respond-to(sm) {
+    height: 200px;
+  }
+  
+  @include respond-to(xs) {
+    height: 160px;
+  }
+  
+  // 轮播图空状态
+  .carousel-empty {
+    @include flex-center;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #e1251b 0%, #c81623 100%);
+    color: rgba(255, 255, 255, 0.8);
+    
+    .el-icon {
+      margin-bottom: $spacing-md;
+    }
+    
+    p {
+      font-size: $font-size-base;
+    }
+  }
   
   .carousel-container {
     position: relative;
@@ -470,22 +586,69 @@ onUnmounted(() => {
       justify-content: space-between;
       height: 100%;
       padding: $spacing-xl $spacing-xxl;
+      
+      @include respond-to(lg) {
+        padding: $spacing-lg $spacing-xl;
+      }
+      
+      @include respond-to(md) {
+        padding: $spacing-md $spacing-lg;
+      }
+      
+      @include respond-to(sm) {
+        padding: $spacing-sm $spacing-md;
+      }
     }
     
     .slide-text {
       color: $color-white;
+      flex: 1;
+      min-width: 0;
       
       h2 {
         font-size: 36px;
         font-weight: $font-weight-bold;
         margin-bottom: $spacing-md;
         text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        
+        @include respond-to(lg) {
+          font-size: 28px;
+        }
+        
+        @include respond-to(md) {
+          font-size: 24px;
+          margin-bottom: $spacing-sm;
+        }
+        
+        @include respond-to(sm) {
+          font-size: 18px;
+          margin-bottom: $spacing-xs;
+        }
+        
+        @include respond-to(xs) {
+          font-size: 16px;
+        }
       }
       
       p {
         font-size: $font-size-lg;
         opacity: 0.9;
         margin-bottom: $spacing-lg;
+        
+        @include respond-to(lg) {
+          font-size: $font-size-base;
+          margin-bottom: $spacing-md;
+        }
+        
+        @include respond-to(md) {
+          font-size: $font-size-sm;
+          margin-bottom: $spacing-sm;
+        }
+        
+        @include respond-to(sm) {
+          font-size: $font-size-xs;
+          margin-bottom: $spacing-xs;
+        }
       }
       
       .slide-btn {
@@ -499,6 +662,17 @@ onUnmounted(() => {
         cursor: pointer;
         transition: all $transition-fast;
         
+        @include respond-to(md) {
+          padding: $spacing-xs $spacing-md;
+          font-size: $font-size-sm;
+        }
+        
+        @include respond-to(sm) {
+          padding: $spacing-xs $spacing-sm;
+          font-size: $font-size-xs;
+          border-radius: $radius-md;
+        }
+        
         &:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -507,12 +681,36 @@ onUnmounted(() => {
     }
     
     .slide-image {
+      flex-shrink: 0;
+      
+      @include respond-to(sm) {
+        display: none; // 小屏幕隐藏图片区域
+      }
+      
       .image-placeholder {
         width: 280px;
         height: 280px;
         border-radius: $radius-xl;
         @include flex-center;
         color: rgba(255, 255, 255, 0.8);
+        
+        @include respond-to(lg) {
+          width: 200px;
+          height: 200px;
+          
+          .el-icon {
+            font-size: 48px !important;
+          }
+        }
+        
+        @include respond-to(md) {
+          width: 160px;
+          height: 160px;
+          
+          .el-icon {
+            font-size: 40px !important;
+          }
+        }
       }
     }
   }
@@ -531,6 +729,17 @@ onUnmounted(() => {
     opacity: 0;
     transition: all $transition-fast;
     @include flex-center;
+    
+    @include respond-to(md) {
+      width: 30px;
+      height: 45px;
+      opacity: 1; // 移动端始终显示
+    }
+    
+    @include respond-to(sm) {
+      width: 24px;
+      height: 36px;
+    }
     
     &:hover {
       background: rgba(0, 0, 0, 0.5);
@@ -560,6 +769,11 @@ onUnmounted(() => {
     display: flex;
     gap: $spacing-sm;
     
+    @include respond-to(sm) {
+      bottom: $spacing-sm;
+      gap: $spacing-xs;
+    }
+    
     .dot {
       width: 24px;
       height: 4px;
@@ -568,9 +782,18 @@ onUnmounted(() => {
       cursor: pointer;
       transition: all $transition-fast;
       
+      @include respond-to(sm) {
+        width: 16px;
+        height: 3px;
+      }
+      
       &.active {
         background: $color-white;
         width: 32px;
+        
+        @include respond-to(sm) {
+          width: 24px;
+        }
       }
       
       &:hover:not(.active) {
@@ -587,6 +810,15 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   border-left: 1px solid $border-light;
+  
+  @include respond-to(lg) {
+    width: 180px;
+  }
+  
+  // 平板端隐藏右侧信息栏
+  @include respond-to(md) {
+    display: none;
+  }
 }
 
 // 用户信息

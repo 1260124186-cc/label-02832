@@ -7,13 +7,13 @@
           <el-icon class="icon"><Star /></el-icon>
           <span>为你推荐</span>
         </div>
-        <div class="tabs">
+        <div v-if="tabs.length > 0" class="tabs">
           <span 
             v-for="tab in tabs" 
             :key="tab.id"
             class="tab"
             :class="{ active: activeTab === tab.id }"
-            @click="activeTab = tab.id"
+            @click="switchTab(tab.id)"
           >
             {{ tab.name }}
           </span>
@@ -25,7 +25,7 @@
       </div>
       
       <!-- 商品列表 -->
-      <div class="product-grid">
+      <div v-if="hasProducts" class="product-grid">
         <ProductCard 
           v-for="product in displayProducts" 
           :key="product.id"
@@ -36,448 +36,181 @@
         />
       </div>
       
-      <!-- 加载更多 -->
-      <div class="load-more">
+      <!-- 商品为空时的占位 -->
+      <div v-else class="product-empty">
+        <el-icon :size="48"><Star /></el-icon>
+        <p>暂无商品数据</p>
+      </div>
+      
+      <!-- 加载更多（仅在有更多商品时显示） -->
+      <div v-if="hasProducts" class="load-more">
         <button 
+          v-if="hasMoreProducts"
           class="load-btn" 
           :class="{ loading: isLoading }"
+          :disabled="isLoading"
           @click="loadMore"
         >
           <el-icon v-if="isLoading" class="is-loading"><Loading /></el-icon>
           <span>{{ isLoading ? '加载中...' : '查看更多商品' }}</span>
         </button>
+        <span v-else class="no-more">已经到底啦~</span>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { Star, ArrowRight, Loading } from '@element-plus/icons-vue'
 import ProductCard from '@/components/common/ProductCard.vue'
 import { showDevelopingToast } from '@/utils/toast'
+import { createLogger } from '@/utils/logger'
 
-// 导入本地图片
-import iphone15Img from '@/assets/images/products/iphone15.webp'
-import huaweiMate60Img from '@/assets/images/products/huaweimeta50.webp'
-import xiaomi14Img from '@/assets/images/products/xiaomi14.jpeg'
-import macbookImg from '@/assets/images/products/macbook.webp'
-import dysonImg from '@/assets/images/products/daisenv15.webp'
-import ps5Img from '@/assets/images/products/suoniplaystation.webp'
-import haierFridgeImg from '@/assets/images/products/haierbcd.webp'
-import mideaAcImg from '@/assets/images/products/mideakfr.webp'
-import esteeLauderImg from '@/assets/images/products/yashilandai.webp'
-import nikeAj1Img from '@/assets/images/products/AirJordan.webp'
-import nikeAirForceImg from '@/assets/images/products/AirForce.webp'
-import moutaiImg from '@/assets/images/products/maotai.webp'
-import switchImg from '@/assets/images/products/switch.webp'
-import airpodsImg from '@/assets/images/products/airpods.webp'
+// 从 mock 数据导入商品数据
+import {
+  productTabs,
+  recommendProducts as mockRecommendProducts,
+  newProducts as mockNewProducts,
+  hotProducts as mockHotProducts,
+  discountProducts as mockDiscountProducts
+} from '@/mock/products'
+
+// 创建日志记录器
+const logger = createLogger('Product')
+
+// 配置
+const PRODUCT_CONFIG = {
+  initialPageSize: 10,
+  loadMoreCount: 5,
+  loadingDelay: 1000  // 模拟加载延迟（毫秒）
+}
 
 const activeTab = ref('recommend')
 const isLoading = ref(false)
-const pageSize = ref(10)
+const loadError = ref(false)
+const pageSize = ref(PRODUCT_CONFIG.initialPageSize)
 
 const handleClick = () => {
   showDevelopingToast()
 }
 
-const tabs = ref([
-  { id: 'recommend', name: '精选推荐' },
-  { id: 'new', name: '新品上市' },
-  { id: 'hot', name: '热销榜单' },
-  { id: 'discount', name: '特惠专区' }
-])
-
-// 精选推荐商品
-const recommendProducts = ref([
-  {
-    id: 1,
-    name: 'Apple iPhone 15 Pro Max 256GB 原色钛金属 支持移动联通电信5G 双卡双待手机',
-    desc: 'A17 Pro芯片，钛金属设计',
-    price: 9999,
-    originalPrice: 10999,
-    comments: 125000,
-    goodRate: 98,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    promotion: '满5000减500',
-    image: iphone15Img
-  },
-  {
-    id: 2,
-    name: '华为 HUAWEI Mate 60 Pro 雅丹黑 12GB+512GB 卫星通话 鸿蒙系统',
-    desc: '麒麟芯片回归，卫星通话',
-    price: 6999,
-    originalPrice: 7999,
-    comments: 89000,
-    goodRate: 97,
-    isJdLogistics: true,
-    promotion: '以旧换新补贴',
-    image: huaweiMate60Img
-  },
-  {
-    id: 3,
-    name: '小米14 Pro 徕卡光学镜头 骁龙8Gen3 12GB+256GB 白色 5G手机',
-    desc: '徕卡影像，骁龙8Gen3',
-    price: 4999,
-    originalPrice: 5499,
-    comments: 56000,
-    goodRate: 96,
-    isJdLogistics: true,
-    tags: [{ text: 'PLUS', type: 'plus' }],
-    image: xiaomi14Img
-  },
-  {
-    id: 4,
-    name: 'Apple MacBook Pro 14英寸 M3 Pro芯片 18GB+512GB 深空黑色 笔记本电脑',
-    desc: 'M3 Pro芯片，专业创作',
-    price: 16999,
-    originalPrice: 18499,
-    comments: 23000,
-    goodRate: 99,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    promotion: '教育优惠立减',
-    image: macbookImg
-  },
-  {
-    id: 5,
-    name: '戴森 Dyson V15 Detect 无绳吸尘器 激光探测 智能灰尘感应',
-    desc: '激光探测灰尘，智能清洁',
-    price: 5490,
-    originalPrice: 6490,
-    comments: 45000,
-    goodRate: 95,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: dysonImg
-  },
-  {
-    id: 6,
-    name: '索尼 PlayStation 5 光驱版 国行游戏机 PS5 家用主机',
-    desc: '次世代游戏体验',
-    price: 3899,
-    originalPrice: 4299,
-    comments: 67000,
-    goodRate: 98,
-    isJdLogistics: true,
-    image: ps5Img
-  },
-  {
-    id: 7,
-    name: '海尔 BCD-470WDPG 十字对开门冰箱 470升 一级能效 风冷无霜',
-    desc: '大容量，一级能效',
-    price: 4599,
-    originalPrice: 5299,
-    comments: 34000,
-    goodRate: 96,
-    isJdLogistics: true,
-    promotion: '以旧换新补贴500',
-    image: haierFridgeImg
-  },
-  {
-    id: 8,
-    name: '美的 KFR-35GW/N8MJA3 大1.5匹 新一级能效 变频冷暖空调',
-    desc: '新一级能效，智能控制',
-    price: 3299,
-    originalPrice: 3999,
-    comments: 89000,
-    goodRate: 97,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: mideaAcImg
-  },
-  {
-    id: 9,
-    name: '雅诗兰黛 小棕瓶精华液 100ml 第七代 修护肌底精华',
-    desc: '经典修护，焕活肌肤',
-    price: 1080,
-    originalPrice: 1350,
-    comments: 120000,
-    goodRate: 98,
-    isJdLogistics: true,
-    tags: [{ text: 'PLUS', type: 'plus' }],
-    promotion: '买赠小样套装',
-    image: esteeLauderImg
-  },
-  {
-    id: 10,
-    name: 'Nike Air Jordan 1 High OG 芝加哥 复刻 男子运动篮球鞋',
-    desc: '经典复刻，潮流必备',
-    price: 1299,
-    originalPrice: 1599,
-    comments: 45000,
-    goodRate: 95,
-    isJdLogistics: true,
-    image: nikeAj1Img
-  },
-  {
-    id: 11,
-    name: '茅台 飞天53度 500ml 贵州茅台酒 酱香型白酒',
-    desc: '正品保障，酱香经典',
-    price: 2499,
-    comments: 230000,
-    goodRate: 99,
-    isJdLogistics: true,
-    image: moutaiImg
-  },
-  {
-    id: 12,
-    name: '任天堂 Switch OLED 白色 日版 掌上游戏机 NS续航增强版',
-    desc: 'OLED屏幕，续航增强',
-    price: 2199,
-    originalPrice: 2599,
-    comments: 78000,
-    goodRate: 97,
-    isJdLogistics: true,
-    promotion: '赠游戏卡带',
-    image: switchImg
+// 初始化数据（带错误处理）
+const initializeProducts = (data, name) => {
+  if (!Array.isArray(data)) {
+    logger.warn(`${name} 数据格式无效`, { type: typeof data })
+    return []
   }
-])
+  logger.debug(`${name} 数据加载成功`, { count: data.length })
+  return data
+}
 
-// 新品上市商品
-const newProducts = ref([
-  {
-    id: 101,
-    name: 'Apple iPhone 15 Pro Max 蓝色钛金属 256GB 全新上市',
-    desc: '全新钛金属配色',
-    price: 9999,
-    originalPrice: 10999,
-    comments: 8500,
-    goodRate: 99,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: iphone15Img
-  },
-  {
-    id: 102,
-    name: '华为 Mate X5 折叠屏手机 典藏版 16GB+512GB',
-    desc: '超轻薄折叠旗舰',
-    price: 12999,
-    comments: 3200,
-    goodRate: 98,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: huaweiMate60Img
-  },
-  {
-    id: 103,
-    name: '小米14 Ultra 徕卡专业影像 16GB+512GB 黑色',
-    desc: '徕卡一英寸大底',
-    price: 6499,
-    comments: 1800,
-    goodRate: 97,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: xiaomi14Img
-  },
-  {
-    id: 104,
-    name: 'Apple MacBook Air 15英寸 M3芯片 8GB+256GB 午夜色',
-    desc: 'M3芯片，轻薄便携',
-    price: 10499,
-    comments: 2100,
-    goodRate: 98,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: macbookImg
-  },
-  {
-    id: 105,
-    name: '戴森 Airwrap 多功能美发造型器 新一代',
-    desc: '一机多用，轻松造型',
-    price: 4290,
-    comments: 890,
-    goodRate: 96,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: dysonImg
-  },
-  {
-    id: 106,
-    name: '索尼 PS5 Slim 轻薄版 光驱版 国行游戏机',
-    desc: '更轻更薄，性能不变',
-    price: 3799,
-    comments: 1200,
-    goodRate: 97,
-    isJdLogistics: true,
-    tags: [{ text: '新品', type: 'new' }],
-    image: ps5Img
-  }
-])
-
-// 热销榜单商品
-const hotProducts = ref([
-  {
-    id: 201,
-    name: '茅台 飞天53度 500ml 贵州茅台酒 酱香型白酒',
-    desc: '京东自营，正品保障',
-    price: 2499,
-    comments: 350000,
-    goodRate: 99,
-    isJdLogistics: true,
-    image: moutaiImg
-  },
-  {
-    id: 202,
-    name: 'Apple iPhone 15 128GB 蓝色 5G双卡双待手机',
-    desc: '灵动岛设计，4800万像素',
-    price: 5999,
-    originalPrice: 6499,
-    comments: 280000,
-    goodRate: 98,
-    isJdLogistics: true,
-    image: iphone15Img
-  },
-  {
-    id: 203,
-    name: '华为 HUAWEI Mate 60 雅川青 12GB+256GB',
-    desc: '超可靠玄武架构',
-    price: 5999,
-    comments: 195000,
-    goodRate: 97,
-    isJdLogistics: true,
-    image: huaweiMate60Img
-  },
-  {
-    id: 204,
-    name: '美的 变频空调 1.5匹 新一级能效',
-    desc: '冷暖两用，节能省电',
-    price: 2999,
-    originalPrice: 3599,
-    comments: 180000,
-    goodRate: 96,
-    isJdLogistics: true,
-    image: mideaAcImg
-  },
-  {
-    id: 205,
-    name: '海尔 冰箱 四门 475升 一级能效',
-    desc: '大容量，全空间保鲜',
-    price: 5299,
-    originalPrice: 6299,
-    comments: 165000,
-    goodRate: 97,
-    isJdLogistics: true,
-    image: haierFridgeImg
-  },
-  {
-    id: 206,
-    name: 'Nike Air Force 1 空军一号 白色 经典板鞋',
-    desc: '经典百搭，舒适耐穿',
-    price: 799,
-    comments: 145000,
-    goodRate: 95,
-    isJdLogistics: true,
-    image: nikeAirForceImg
-  }
-])
-
-// 特惠专区商品
-const discountProducts = ref([
-  {
-    id: 301,
-    name: '戴森 V12 无绳吸尘器 轻量版 家用手持',
-    desc: '轻便省力，强劲吸力',
-    price: 3990,
-    originalPrice: 4990,
-    comments: 42000,
-    goodRate: 95,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: dysonImg
-  },
-  {
-    id: 302,
-    name: '雅诗兰黛 小棕瓶精华 50ml 修护精华',
-    desc: '经典修护，7天见效',
-    price: 680,
-    originalPrice: 880,
-    comments: 88000,
-    goodRate: 98,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: esteeLauderImg
-  },
-  {
-    id: 303,
-    name: '任天堂 Switch 续航增强版 红蓝色',
-    desc: '掌机主机随心切换',
-    price: 1899,
-    originalPrice: 2299,
-    comments: 62000,
-    goodRate: 97,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: switchImg
-  },
-  {
-    id: 304,
-    name: '索尼 PS5 手柄 DualSense 无线控制器',
-    desc: '沉浸式触觉反馈',
-    price: 469,
-    originalPrice: 549,
-    comments: 38000,
-    goodRate: 96,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: ps5Img
-  },
-  {
-    id: 305,
-    name: '小米 Redmi Note 13 Pro 5G 8GB+256GB',
-    desc: '2亿像素，超清主摄',
-    price: 1599,
-    originalPrice: 1999,
-    comments: 95000,
-    goodRate: 94,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: xiaomi14Img
-  },
-  {
-    id: 306,
-    name: 'Apple AirPods 3 无线蓝牙耳机 MagSafe充电盒',
-    desc: '空间音频，个性化',
-    price: 1199,
-    originalPrice: 1399,
-    comments: 72000,
-    goodRate: 97,
-    isJdLogistics: true,
-    tags: [{ text: '特惠', type: 'sale' }],
-    image: airpodsImg
-  }
-])
+// 使用 mock 数据（带数据校验）
+const tabs = ref(Array.isArray(productTabs) ? productTabs : [])
+const recommendProducts = ref(initializeProducts(mockRecommendProducts, '推荐商品'))
+const newProducts = ref(initializeProducts(mockNewProducts, '新品'))
+const hotProducts = ref(initializeProducts(mockHotProducts, '热销商品'))
+const discountProducts = ref(initializeProducts(mockDiscountProducts, '特惠商品'))
 
 // 根据Tab切换展示不同商品
 const currentProducts = computed(() => {
-  switch (activeTab.value) {
-    case 'new':
-      return newProducts.value
-    case 'hot':
-      return hotProducts.value
-    case 'discount':
-      return discountProducts.value
-    default:
-      return recommendProducts.value
+  const productMap = {
+    recommend: recommendProducts.value,
+    new: newProducts.value,
+    hot: hotProducts.value,
+    discount: discountProducts.value
   }
+  
+  const products = productMap[activeTab.value]
+  
+  // 边界检查
+  if (!products || !Array.isArray(products)) {
+    logger.warn('当前分类商品数据无效', { tab: activeTab.value })
+    return []
+  }
+  
+  return products
 })
 
+// 计算属性：显示的商品（带边界检查）
 const displayProducts = computed(() => {
-  return currentProducts.value.slice(0, pageSize.value)
+  const products = currentProducts.value
+  
+  if (products.length === 0) {
+    return []
+  }
+  
+  // 确保 pageSize 不超过实际商品数量
+  const safePageSize = Math.min(pageSize.value, products.length)
+  return products.slice(0, safePageSize)
 })
+
+// 计算属性：是否还有更多商品
+const hasMoreProducts = computed(() => {
+  return currentProducts.value.length > pageSize.value
+})
+
+// 计算属性：是否有商品
+const hasProducts = computed(() => {
+  return currentProducts.value.length > 0
+})
+
+// 切换 Tab
+const switchTab = (tabId) => {
+  if (activeTab.value === tabId) {
+    logger.debug('已在当前 Tab', { tab: tabId })
+    return
+  }
+  
+  logger.info('切换商品分类', { from: activeTab.value, to: tabId })
+  activeTab.value = tabId
+  pageSize.value = PRODUCT_CONFIG.initialPageSize  // 重置分页
+}
 
 const loadMore = () => {
-  if (isLoading.value) return
+  if (isLoading.value) {
+    logger.debug('正在加载中，跳过请求')
+    return
+  }
   
+  if (!hasMoreProducts.value) {
+    logger.debug('没有更多商品了')
+    return
+  }
+  
+  logger.info('加载更多商品', { currentPageSize: pageSize.value })
   isLoading.value = true
+  loadError.value = false
   
   // 模拟加载延迟
   setTimeout(() => {
-    pageSize.value += 5
-    isLoading.value = false
-  }, 1000)
+    try {
+      pageSize.value += PRODUCT_CONFIG.loadMoreCount
+      logger.debug('加载完成', { newPageSize: pageSize.value })
+    } catch (error) {
+      logger.error('加载更多失败', error)
+      loadError.value = true
+    } finally {
+      isLoading.value = false
+    }
+  }, PRODUCT_CONFIG.loadingDelay)
 }
+
+// 监听 Tab 变化
+watch(activeTab, (newTab, oldTab) => {
+  logger.debug('Tab 变化', { from: oldTab, to: newTab, productCount: currentProducts.value.length })
+})
+
+// 组件初始化
+onMounted(() => {
+  logger.info('Product 组件挂载', {
+    tabsCount: tabs.value.length,
+    recommendCount: recommendProducts.value.length,
+    newCount: newProducts.value.length,
+    hotCount: hotProducts.value.length,
+    discountCount: discountProducts.value.length
+  })
+})
 
 const handleProductClick = (product) => {
   console.log('点击商品:', product.name)
@@ -593,6 +326,25 @@ const handleCollect = (product) => {
   }
 }
 
+// 商品空状态
+.product-empty {
+  @include flex-center;
+  flex-direction: column;
+  padding: $spacing-xxl;
+  background: $color-white;
+  border-radius: $radius-lg;
+  color: $color-text-placeholder;
+  
+  .el-icon {
+    margin-bottom: $spacing-md;
+    color: $border-medium;
+  }
+  
+  p {
+    font-size: $font-size-base;
+  }
+}
+
 // 加载更多
 .load-more {
   margin-top: $spacing-lg;
@@ -616,13 +368,14 @@ const handleCollect = (product) => {
       margin-right: $spacing-sm;
     }
     
-    &:hover:not(.loading) {
+    &:hover:not(.loading):not(:disabled) {
       color: $jd-red;
       border-color: $jd-red;
       background: rgba($jd-red, 0.05);
     }
     
-    &.loading {
+    &.loading,
+    &:disabled {
       cursor: not-allowed;
       opacity: 0.7;
       
@@ -630,6 +383,13 @@ const handleCollect = (product) => {
         animation: rotate 1s linear infinite;
       }
     }
+  }
+  
+  .no-more {
+    display: inline-block;
+    padding: $spacing-md;
+    font-size: $font-size-sm;
+    color: $color-text-placeholder;
   }
 }
 

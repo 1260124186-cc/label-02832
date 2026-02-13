@@ -92,6 +92,11 @@ const handleClick = () => {
   font-size: $font-size-xs;
   line-height: 30px;
   
+  // 平板和手机端隐藏顶部栏
+  @include respond-to(md) {
+    display: none;
+  }
+  
   .container {
     @include flex-between;
     max-width: $container-width;
@@ -100,6 +105,8 @@ const handleClick = () => {
   }
   
   &-left {
+    flex-shrink: 0;
+    
     .location {
       display: inline-flex;
       align-items: center;
@@ -124,11 +131,26 @@ const handleClick = () => {
   &-right {
     display: flex;
     align-items: center;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    
+    // 隐藏滚动条
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    -ms-overflow-style: none;
+    scrollbar-width: none;
     
     .nav-item {
       position: relative;
       padding: 0 $spacing-sm;
       border-left: 1px solid #666;
+      white-space: nowrap;
+      flex-shrink: 0;
+      
+      @include respond-to(lg) {
+        padding: 0 $spacing-xs;
+      }
       
       &:first-child {
         border-left: none;
@@ -145,6 +167,10 @@ const handleClick = () => {
         &.highlight {
           color: $jd-red;
           margin-left: $spacing-sm;
+          
+          @include respond-to(lg) {
+            margin-left: $spacing-xs;
+          }
           
           &:hover {
             color: $jd-red-light;

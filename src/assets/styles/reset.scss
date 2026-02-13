@@ -16,6 +16,8 @@ html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  // 防止横向滚动条
+  overflow-x: hidden;
 }
 
 body {
@@ -26,6 +28,9 @@ body {
   background-color: $bg-primary;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  // 防止横向滚动条
+  overflow-x: hidden;
+  min-width: 320px; // 设置最小宽度支持
 }
 
 // 链接样式
