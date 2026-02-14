@@ -55,9 +55,17 @@ src/mock/
 ### Banner 数据 (banner.js)
 
 包含以下数据：
-- `slides` - 轮播图数据（4条）
+- `slides` - 轮播图数据（4条），复用 products 目录中的商品图片
 - `newsList` - 京东快报数据（4条）
 - `services` - 服务入口（4个）
+
+**轮播图对应图片：**
+| 轮播图 | 使用图片 |
+|-------|---------|
+| iPhone 15 Pro Max | `iphone15.webp` |
+| 京东超级品牌日 | `daisenv15.webp`（戴森V15） |
+| 家电焕新季 | `xiaomidianshi.webp`（小米电视） |
+| 电脑数码节 | `macbook.webp` |
 
 ### 导航数据 (navigation.js)
 

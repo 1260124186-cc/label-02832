@@ -5,6 +5,12 @@
  * 在生产环境中，这些数据应通过后端 API 接口获取
  */
 
+// 导入 Banner 图片（使用 products 目录中的商品图片）
+import iphone15Img from '@/assets/images/products/iphone15.webp'
+import daisenv15Img from '@/assets/images/products/daisenv15.webp'
+import xiaomidianshiImg from '@/assets/images/products/xiaomidianshi.webp'
+import macbookImg from '@/assets/images/products/macbook.webp'
+
 /**
  * 轮播图数据
  */
@@ -17,6 +23,7 @@ export const slides = [
     bgColor: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
     imgBg: 'rgba(255,255,255,0.1)',
     icon: 'Iphone',
+    image: iphone15Img,
     link: '/product/iphone15'
   },
   {
@@ -27,6 +34,7 @@ export const slides = [
     bgColor: 'linear-gradient(135deg, #e1251b 0%, #c81623 100%)',
     imgBg: 'rgba(255,255,255,0.2)',
     icon: 'Present',
+    image: daisenv15Img,
     link: '/activity/brand-day'
   },
   {
@@ -37,6 +45,7 @@ export const slides = [
     bgColor: 'linear-gradient(135deg, #2d3436 0%, #636e72 100%)',
     imgBg: 'rgba(255,255,255,0.1)',
     icon: 'HomeFilled',
+    image: xiaomidianshiImg,
     link: '/activity/home-appliance'
   },
   {
@@ -47,6 +56,7 @@ export const slides = [
     bgColor: 'linear-gradient(135deg, #0984e3 0%, #74b9ff 100%)',
     imgBg: 'rgba(255,255,255,0.15)',
     icon: 'Monitor',
+    image: macbookImg,
     link: '/activity/digital-festival'
   }
 ]

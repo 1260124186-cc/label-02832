@@ -87,7 +87,18 @@
                     <button class="slide-btn" @click="handleClick">{{ slide.btnText || '立即查看' }}</button>
                   </div>
                   <div class="slide-image" aria-hidden="true">
-                    <div class="image-placeholder" :style="{ background: slide.imgBg || 'rgba(255,255,255,0.1)' }">
+                    <!-- 优先显示图片，如果没有图片则显示图标占位 -->
+                    <img 
+                      v-if="slide.image" 
+                      :src="slide.image" 
+                      :alt="slide.title"
+                      class="banner-img"
+                    />
+                    <div 
+                      v-else 
+                      class="image-placeholder" 
+                      :style="{ background: slide.imgBg || 'rgba(255,255,255,0.1)' }"
+                    >
                       <el-icon :size="60"><component :is="slide.icon || 'Present'" /></el-icon>
                     </div>
                   </div>
@@ -695,6 +706,7 @@ onUnmounted(() => {
     flex-shrink: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
     
     .slide-content {
       display: flex;
@@ -702,17 +714,21 @@ onUnmounted(() => {
       justify-content: space-between;
       height: 100%;
       padding: $spacing-xl $spacing-xxl;
+      gap: $spacing-xl;
       
       @include respond-to(lg) {
         padding: $spacing-lg $spacing-xl;
+        gap: $spacing-lg;
       }
       
       @include respond-to(md) {
         padding: $spacing-md $spacing-lg;
+        gap: $spacing-md;
       }
       
       @include respond-to(sm) {
         padding: $spacing-sm $spacing-md;
+        gap: $spacing-sm;
       }
     }
     
@@ -720,19 +736,26 @@ onUnmounted(() => {
       color: $color-white;
       flex: 1;
       min-width: 0;
+      max-width: 45%;
+      z-index: 2;
+      
+      @include respond-to(sm) {
+        max-width: 100%;
+      }
       
       h2 {
-        font-size: 36px;
+        font-size: 32px;
         font-weight: $font-weight-bold;
         margin-bottom: $spacing-md;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+        line-height: 1.3;
         
         @include respond-to(lg) {
-          font-size: 28px;
+          font-size: 26px;
         }
         
         @include respond-to(md) {
-          font-size: 24px;
+          font-size: 22px;
           margin-bottom: $spacing-sm;
         }
         
@@ -748,8 +771,9 @@ onUnmounted(() => {
       
       p {
         font-size: $font-size-lg;
-        opacity: 0.9;
+        opacity: 0.95;
         margin-bottom: $spacing-lg;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         
         @include respond-to(lg) {
           font-size: $font-size-base;
@@ -768,39 +792,78 @@ onUnmounted(() => {
       }
       
       .slide-btn {
-        padding: $spacing-sm $spacing-xl;
+        display: inline-block;
+        padding: 12px 32px;
         font-size: $font-size-base;
         font-weight: $font-weight-medium;
         color: $color-text-primary;
         background: $color-white;
         border: none;
-        border-radius: $radius-lg;
+        border-radius: 24px;
         cursor: pointer;
-        transition: all $transition-fast;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         
         @include respond-to(md) {
-          padding: $spacing-xs $spacing-md;
+          padding: 10px 24px;
           font-size: $font-size-sm;
         }
         
         @include respond-to(sm) {
-          padding: $spacing-xs $spacing-sm;
+          padding: 8px 20px;
           font-size: $font-size-xs;
-          border-radius: $radius-md;
+          border-radius: 20px;
         }
         
         &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+          transform: translateY(-3px);
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+          background: #fff;
+        }
+        
+        &:active {
+          transform: translateY(-1px);
         }
       }
     }
     
     .slide-image {
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       
       @include respond-to(sm) {
         display: none; // 小屏幕隐藏图片区域
+      }
+      
+      .banner-img {
+        max-width: 420px;
+        max-height: 380px;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        border-radius: $radius-lg;
+        background: rgba(255, 255, 255, 0.08);
+        padding: $spacing-sm;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        
+        &:hover {
+          transform: scale(1.02);
+          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        @include respond-to(lg) {
+          max-width: 320px;
+          max-height: 300px;
+        }
+        
+        @include respond-to(md) {
+          max-width: 240px;
+          max-height: 220px;
+          padding: $spacing-xs;
+        }
       }
       
       .image-placeholder {
