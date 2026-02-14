@@ -17,6 +17,14 @@ export const serviceGuarantees = [
 ]
 
 /**
+ * 联系信息
+ */
+export const contactInfo = {
+  hotline: '400-610-1360',
+  serviceTime: '8:00-22:00'
+}
+
+/**
  * 帮助中心栏目
  */
 export const helpColumns = [
