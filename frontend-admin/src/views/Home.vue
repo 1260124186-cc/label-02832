@@ -34,7 +34,7 @@
             <div v-else class="section-skeleton flash-sale-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="flash-item" v-for="n in 5" :key="n" />
+                  <Skeleton v-for="n in 5" :key="n" variant="flash-item" />
                 </div>
               </div>
             </div>
@@ -43,7 +43,7 @@
             <div class="section-skeleton flash-sale-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="flash-item" v-for="n in 5" :key="n" />
+                  <Skeleton v-for="n in 5" :key="n" variant="flash-item" />
                 </div>
               </div>
             </div>
@@ -59,7 +59,7 @@
             <div v-else class="section-skeleton brand-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="brand-card" v-for="n in 4" :key="n" />
+                  <Skeleton v-for="n in 4" :key="n" variant="brand-card" />
                 </div>
               </div>
             </div>
@@ -68,7 +68,7 @@
             <div class="section-skeleton brand-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="brand-card" v-for="n in 4" :key="n" />
+                  <Skeleton v-for="n in 4" :key="n" variant="brand-card" />
                 </div>
               </div>
             </div>
@@ -84,7 +84,7 @@
             <div v-else class="section-skeleton product-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="product-card" v-for="n in 10" :key="n" />
+                  <Skeleton v-for="n in 10" :key="n" variant="product-card" />
                 </div>
               </div>
             </div>
@@ -93,7 +93,7 @@
             <div class="section-skeleton product-skeleton">
               <div class="container">
                 <div class="skeleton-wrapper">
-                  <Skeleton variant="product-card" v-for="n in 10" :key="n" />
+                  <Skeleton v-for="n in 10" :key="n" variant="product-card" />
                 </div>
               </div>
             </div>

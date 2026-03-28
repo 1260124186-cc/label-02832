@@ -1,6 +1,6 @@
 /**
  * 限时秒杀模拟数据
- * 
+ *
  * 说明：本文件包含限时秒杀相关的模拟数据，仅用于前端开发和演示目的
  * 在生产环境中，这些数据应通过后端 API 接口获取
  */
@@ -82,7 +82,7 @@ export const getFlashSaleRemainingTime = () => {
   const now = new Date()
   const currentHour = now.getHours()
   const { sessions, duration } = flashSaleConfig
-  
+
   // 找到当前或下一个秒杀场次
   let currentSession = null
   for (const session of sessions) {
@@ -91,14 +91,14 @@ export const getFlashSaleRemainingTime = () => {
       break
     }
   }
-  
+
   if (currentSession !== null) {
     // 当前正在秒杀中，计算结束时间
     const endTime = new Date(now)
     endTime.setHours(currentSession + duration, 0, 0, 0)
     return Math.max(0, Math.floor((endTime - now) / 1000))
   }
-  
+
   // 默认返回 2.5 小时
   return 2.5 * 3600
 }
@@ -110,7 +110,7 @@ export const formatCountdown = (totalSeconds) => {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  
+
   return {
     hours: String(hours).padStart(2, '0'),
     minutes: String(minutes).padStart(2, '0'),

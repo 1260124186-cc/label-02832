@@ -2,105 +2,105 @@
   <div class="skeleton" :class="[`skeleton-${variant}`, { animated: animate }]">
     <!-- 图片骨架 -->
     <template v-if="variant === 'image'">
-      <div class="skeleton-image" :style="imageStyle"></div>
+      <div class="skeleton-image" :style="imageStyle" />
     </template>
-    
+
     <!-- 文本骨架 -->
     <template v-else-if="variant === 'text'">
-      <div 
-        v-for="n in rows" 
-        :key="n" 
+      <div
+        v-for="n in rows"
+        :key="n"
         class="skeleton-text"
         :style="{ width: n === rows ? lastRowWidth : '100%' }"
-      ></div>
+      />
     </template>
-    
+
     <!-- 头像骨架 -->
     <template v-else-if="variant === 'avatar'">
-      <div class="skeleton-avatar" :class="`avatar-${avatarShape}`" :style="avatarStyle"></div>
+      <div class="skeleton-avatar" :class="`avatar-${avatarShape}`" :style="avatarStyle" />
     </template>
-    
+
     <!-- 按钮骨架 -->
     <template v-else-if="variant === 'button'">
-      <div class="skeleton-button" :style="buttonStyle"></div>
+      <div class="skeleton-button" :style="buttonStyle" />
     </template>
-    
+
     <!-- 商品卡片骨架 -->
     <template v-else-if="variant === 'product-card'">
       <div class="skeleton-product-card">
-        <div class="skeleton-product-image"></div>
+        <div class="skeleton-product-image" />
         <div class="skeleton-product-info">
-          <div class="skeleton-text" style="width: 100%"></div>
-          <div class="skeleton-text" style="width: 80%"></div>
-          <div class="skeleton-text" style="width: 40%"></div>
+          <div class="skeleton-text" style="width: 100%" />
+          <div class="skeleton-text" style="width: 80%" />
+          <div class="skeleton-text" style="width: 40%" />
         </div>
       </div>
     </template>
-    
+
     <!-- 品牌卡片骨架 -->
     <template v-else-if="variant === 'brand-card'">
       <div class="skeleton-brand-card">
         <div class="skeleton-brand-header">
-          <div class="skeleton-avatar avatar-square" style="width: 48px; height: 48px"></div>
+          <div class="skeleton-avatar avatar-square" style="width: 48px; height: 48px" />
           <div class="skeleton-brand-info">
-            <div class="skeleton-text" style="width: 60%"></div>
-            <div class="skeleton-text" style="width: 80%"></div>
+            <div class="skeleton-text" style="width: 60%" />
+            <div class="skeleton-text" style="width: 80%" />
           </div>
         </div>
         <div class="skeleton-brand-products">
           <div v-for="n in 3" :key="n" class="skeleton-mini-product">
-            <div class="skeleton-image" style="height: 70px"></div>
-            <div class="skeleton-text" style="width: 80%"></div>
-            <div class="skeleton-text" style="width: 50%"></div>
+            <div class="skeleton-image" style="height: 70px" />
+            <div class="skeleton-text" style="width: 80%" />
+            <div class="skeleton-text" style="width: 50%" />
           </div>
         </div>
         <div class="skeleton-brand-footer">
-          <div class="skeleton-text" style="width: 30%"></div>
-          <div class="skeleton-text" style="width: 20%"></div>
+          <div class="skeleton-text" style="width: 30%" />
+          <div class="skeleton-text" style="width: 20%" />
         </div>
       </div>
     </template>
-    
+
     <!-- 秒杀商品骨架 -->
     <template v-else-if="variant === 'flash-item'">
       <div class="skeleton-flash-item">
-        <div class="skeleton-image" style="height: 120px"></div>
+        <div class="skeleton-image" style="height: 120px" />
         <div class="skeleton-flash-info">
-          <div class="skeleton-text" style="width: 40%; height: 20px"></div>
-          <div class="skeleton-text" style="width: 80%"></div>
-          <div class="skeleton-text" style="width: 60%"></div>
-          <div class="skeleton-text" style="width: 100%; height: 6px"></div>
-          <div class="skeleton-button" style="width: 100%; height: 28px"></div>
+          <div class="skeleton-text" style="width: 40%; height: 20px" />
+          <div class="skeleton-text" style="width: 80%" />
+          <div class="skeleton-text" style="width: 60%" />
+          <div class="skeleton-text" style="width: 100%; height: 6px" />
+          <div class="skeleton-button" style="width: 100%; height: 28px" />
         </div>
       </div>
     </template>
-    
+
     <!-- 轮播图骨架 -->
     <template v-else-if="variant === 'banner'">
       <div class="skeleton-banner">
-        <div class="skeleton-banner-side"></div>
-        <div class="skeleton-banner-main"></div>
+        <div class="skeleton-banner-side" />
+        <div class="skeleton-banner-main" />
         <div class="skeleton-banner-info">
-          <div class="skeleton-avatar" style="width: 60px; height: 60px"></div>
-          <div class="skeleton-text" style="width: 60%"></div>
-          <div class="skeleton-text" style="width: 80%"></div>
+          <div class="skeleton-avatar" style="width: 60px; height: 60px" />
+          <div class="skeleton-text" style="width: 60%" />
+          <div class="skeleton-text" style="width: 80%" />
         </div>
       </div>
     </template>
-    
+
     <!-- 分类导航骨架 -->
     <template v-else-if="variant === 'category-nav'">
       <div class="skeleton-category-nav">
         <div v-for="n in 10" :key="n" class="skeleton-category-item">
-          <div class="skeleton-avatar" style="width: 48px; height: 48px"></div>
-          <div class="skeleton-text" style="width: 60px"></div>
+          <div class="skeleton-avatar" style="width: 48px; height: 48px" />
+          <div class="skeleton-text" style="width: 60px" />
         </div>
       </div>
     </template>
-    
+
     <!-- 自定义插槽 -->
     <template v-else>
-      <slot></slot>
+      <slot />
     </template>
   </div>
 </template>
@@ -222,7 +222,7 @@ const buttonStyle = computed(() => ({
   background: #f0f0f0;
   border-radius: 4px;
   margin-bottom: 12px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
@@ -237,11 +237,11 @@ const buttonStyle = computed(() => ({
 // 头像骨架
 .skeleton-avatar {
   background: #f0f0f0;
-  
+
   &.avatar-circle {
     border-radius: 50%;
   }
-  
+
   &.avatar-square {
     border-radius: 8px;
   }
@@ -258,19 +258,19 @@ const buttonStyle = computed(() => ({
   background: #fff;
   border-radius: 8px;
   overflow: hidden;
-  
+
   .skeleton-product-image {
     height: 180px;
     background: #f0f0f0;
   }
-  
+
   .skeleton-product-info {
     padding: 12px;
-    
+
     .skeleton-text {
       height: 14px;
       margin-bottom: 8px;
-      
+
       &:last-child {
         height: 20px;
         margin-top: 12px;
@@ -284,21 +284,21 @@ const buttonStyle = computed(() => ({
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  
+
   .skeleton-brand-header {
     display: flex;
     align-items: center;
     padding: 16px;
     background: #f5f5f5;
-    
+
     .skeleton-brand-info {
       flex: 1;
       margin-left: 12px;
-      
+
       .skeleton-text {
         height: 14px;
         margin-bottom: 8px;
-        
+
         &:last-child {
           height: 12px;
           margin-bottom: 0;
@@ -306,38 +306,38 @@ const buttonStyle = computed(() => ({
       }
     }
   }
-  
+
   .skeleton-brand-products {
     display: flex;
     padding: 12px;
     gap: 12px;
-    
+
     .skeleton-mini-product {
       flex: 1;
       text-align: center;
-      
+
       .skeleton-image {
         margin-bottom: 8px;
         border-radius: 4px;
       }
-      
+
       .skeleton-text {
         height: 10px;
         margin: 0 auto 4px;
-        
+
         &:last-child {
           height: 12px;
         }
       }
     }
   }
-  
+
   .skeleton-brand-footer {
     display: flex;
     justify-content: space-between;
     padding: 12px 16px;
     border-top: 1px solid #f0f0f0;
-    
+
     .skeleton-text {
       height: 12px;
       margin-bottom: 0;
@@ -349,24 +349,24 @@ const buttonStyle = computed(() => ({
 .skeleton-flash-item {
   width: 160px;
   padding: 12px;
-  
+
   .skeleton-image {
     border-radius: 8px;
     margin-bottom: 12px;
   }
-  
+
   .skeleton-flash-info {
     text-align: center;
-    
+
     .skeleton-text {
       margin: 0 auto 8px;
       height: 14px;
-      
+
       &:first-child {
         height: 20px;
       }
     }
-    
+
     .skeleton-button {
       margin-top: 12px;
       border-radius: 6px;
@@ -381,18 +381,18 @@ const buttonStyle = computed(() => ({
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
-  
+
   .skeleton-banner-side {
     width: 210px;
     background: #e8e8e8;
     flex-shrink: 0;
   }
-  
+
   .skeleton-banner-main {
     flex: 1;
     background: #f0f0f0;
   }
-  
+
   .skeleton-banner-info {
     width: 210px;
     flex-shrink: 0;
@@ -400,34 +400,34 @@ const buttonStyle = computed(() => ({
     display: flex;
     flex-direction: column;
     align-items: center;
-    
+
     .skeleton-avatar {
       margin-bottom: 16px;
     }
-    
+
     .skeleton-text {
       margin-bottom: 8px;
     }
   }
-  
+
   @media (max-width: 992px) {
     height: 380px;
-    
+
     .skeleton-banner-side,
     .skeleton-banner-info {
       width: 180px;
     }
   }
-  
+
   @media (max-width: 768px) {
     flex-direction: column;
     height: auto;
-    
+
     .skeleton-banner-side,
     .skeleton-banner-info {
       display: none;
     }
-    
+
     .skeleton-banner-main {
       height: 280px;
     }
@@ -441,27 +441,27 @@ const buttonStyle = computed(() => ({
   padding: 20px;
   background: #fff;
   border-radius: 12px;
-  
+
   .skeleton-category-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    
+
     .skeleton-avatar {
       margin-bottom: 8px;
       border-radius: 12px;
     }
-    
+
     .skeleton-text {
       height: 12px;
     }
   }
-  
+
   @media (max-width: 768px) {
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 16px;
-    
+
     .skeleton-category-item {
       width: calc(20% - 13px);
     }

@@ -1,10 +1,10 @@
 <template>
   <article
     class="product-card"
-    @click="handleClick"
     role="article"
     :aria-label="`商品：${product.name}，价格：${product.price}元`"
     tabindex="0"
+    @click="handleClick"
     @keydown.enter="handleClick"
   >
     <!-- 商品图片 - 使用懒加载 -->
@@ -13,7 +13,7 @@
         v-lazy-img="product.image"
         :alt="product.name"
         class="product-img"
-      />
+      >
 
       <!-- 标签 -->
       <div v-if="product.tags && product.tags.length" class="product-tags" aria-label="商品标签">
@@ -38,7 +38,9 @@
       </h3>
 
       <!-- 商品描述 -->
-      <p v-if="product.desc" class="product-desc">{{ product.desc }}</p>
+      <p v-if="product.desc" class="product-desc">
+        {{ product.desc }}
+      </p>
 
       <!-- 价格区域 -->
       <div class="product-price" aria-label="商品价格">
@@ -59,8 +61,15 @@
       </div>
 
       <!-- 促销信息 -->
-      <div v-if="product.promotion" class="product-promotion" role="status" aria-label="促销信息">
-        <el-icon aria-hidden="true"><Ticket /></el-icon>
+      <div
+        v-if="product.promotion"
+        class="product-promotion"
+        role="status"
+        aria-label="促销信息"
+      >
+        <el-icon aria-hidden="true">
+          <Ticket />
+        </el-icon>
         <span>{{ product.promotion }}</span>
       </div>
     </div>
@@ -69,20 +78,24 @@
     <div class="product-actions" role="group" aria-label="商品操作">
       <button
         class="action-btn"
-        @click.stop="handleAddCart"
         aria-label="将此商品加入购物车"
+        @click.stop="handleAddCart"
       >
-        <el-icon aria-hidden="true"><ShoppingCart /></el-icon>
+        <el-icon aria-hidden="true">
+          <ShoppingCart />
+        </el-icon>
         <span>加入购物车</span>
       </button>
       <button
         class="action-btn"
         :class="{ collected: isCollected }"
-        @click.stop="handleCollect"
         :aria-pressed="isCollected"
         :aria-label="isCollected ? '取消收藏此商品' : '收藏此商品'"
+        @click.stop="handleCollect"
       >
-        <el-icon aria-hidden="true"><StarFilled v-if="isCollected" /><Star v-else /></el-icon>
+        <el-icon aria-hidden="true">
+          <StarFilled v-if="isCollected" /><Star v-else />
+        </el-icon>
         <span>{{ isCollected ? '已收藏' : '收藏' }}</span>
       </button>
     </div>
@@ -90,11 +103,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
 import { Ticket, ShoppingCart, Star, StarFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { showDevelopingToast } from '@/utils/toast'
 import { useCartStore } from '@/stores/cart'
+import { useWishlistStore } from '@/stores/wishlist'
 
 const props = defineProps({
   product: {
@@ -106,7 +120,11 @@ const props = defineProps({
 const emit = defineEmits(['click', 'add-cart', 'collect'])
 
 const cartStore = useCartStore()
-const isCollected = ref(false)
+const wishlistStore = useWishlistStore()
+
+const isCollected = computed(() => {
+  return wishlistStore.isInWishlist(props.product.id)
+})
 
 const priceInteger = computed(() => {
   const price = props.product.price || 0
@@ -142,10 +160,10 @@ const handleAddCart = () => {
 }
 
 const handleCollect = () => {
-  isCollected.value = !isCollected.value
+  const isAdded = wishlistStore.toggleWishlist(props.product)
   emit('collect', props.product)
   ElMessage({
-    message: isCollected.value ? '收藏成功' : '已取消收藏',
+    message: isAdded ? '收藏成功' : '已取消收藏',
     type: 'success',
     duration: 2000
   })

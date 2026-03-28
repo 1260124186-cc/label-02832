@@ -27,13 +27,15 @@
             aria-controls="search-history-list"
             @keyup.enter="handleSearch"
             @focus="showHistory = true"
-          />
+          >
           <button
             class="search-btn"
-            @click="handleSearch"
             aria-label="搜索"
+            @click="handleSearch"
           >
-            <el-icon aria-hidden="true"><Search /></el-icon>
+            <el-icon aria-hidden="true">
+              <Search />
+            </el-icon>
             <span>搜索</span>
           </button>
         </div>
@@ -62,9 +64,11 @@
           <div class="history-header">
             <span id="history-label">搜索历史</span>
             <button
-              @click.prevent="clearHistory"
               aria-label="清空搜索历史"
-            >清空</button>
+              @click.prevent="clearHistory"
+            >
+              清空
+            </button>
           </div>
           <div class="history-list" role="group" aria-labelledby="history-label">
             <a
@@ -85,9 +89,9 @@
         <a
           href="javascript:void(0)"
           class="cart-btn"
-          @click="handleClick"
           aria-label="我的购物车，{{ cartStore.cartCount }} 件商品"
           aria-haspopup="true"
+          @click="handleClick"
         >
           <el-icon aria-hidden="true"><ShoppingCart /></el-icon>
           <span>我的购物车</span>
@@ -97,25 +101,43 @@
         <!-- 购物车悬浮层 -->
         <div class="cart-dropdown" role="dialog" aria-label="购物车">
           <div v-if="cartStore.cartItems.length === 0" class="cart-empty" role="status">
-            <el-icon class="empty-icon" aria-hidden="true"><ShoppingCartFull /></el-icon>
+            <el-icon class="empty-icon" aria-hidden="true">
+              <ShoppingCartFull />
+            </el-icon>
             <p>购物车还是空的，快去挑选商品吧！</p>
           </div>
-          <div v-else class="cart-list" role="list" aria-label="购物车商品列表">
-            <div v-for="item in cartStore.cartItems" :key="item.id" class="cart-item" role="listitem">
-              <img :src="item.image" :alt="item.name" class="item-img" />
+          <div
+            v-else
+            class="cart-list"
+            role="list"
+            aria-label="购物车商品列表"
+          >
+            <div
+              v-for="item in cartStore.cartItems"
+              :key="item.id"
+              class="cart-item"
+              role="listitem"
+            >
+              <img :src="item.image" :alt="item.name" class="item-img">
               <div class="item-info">
-                <p class="item-name">{{ item.name }}</p>
+                <p class="item-name">
+                  {{ item.name }}
+                </p>
                 <p class="item-price">
                   <span class="price">¥{{ item.price }}</span>
                   <span class="qty">x{{ item.qty }}</span>
                 </p>
               </div>
-              <el-icon class="item-delete" @click="cartStore.removeFromCart(item.id)"><Close /></el-icon>
+              <el-icon class="item-delete" @click="cartStore.removeFromCart(item.id)">
+                <Close />
+              </el-icon>
             </div>
             <div class="cart-footer">
               <span class="total">共 {{ cartStore.cartCount }} 件商品</span>
               <span class="total-price">¥{{ cartStore.totalPrice }}</span>
-              <button class="checkout-btn" @click="handleClick">去购物车结算</button>
+              <button class="checkout-btn" @click="handleClick">
+                去购物车结算
+              </button>
             </div>
           </div>
         </div>
