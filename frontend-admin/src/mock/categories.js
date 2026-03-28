@@ -1,6 +1,6 @@
 /**
  * 分类模拟数据
- * 
+ *
  * 说明：本文件包含所有分类相关的模拟数据，仅用于前端开发和演示目的
  * 在生产环境中，这些数据应通过后端 API 接口获取
  */
@@ -134,8 +134,8 @@ export const mainCategories = [
  * 用于 Banner/index.vue 组件
  */
 export const sideCategories = [
-  { 
-    id: 1, 
+  {
+    id: 1,
     name: '手机/数码/配件',
     children: [
       { title: '手机通讯', links: ['手机', '游戏手机', '拍照手机', '5G手机', '老人机', '对讲机'] },
@@ -144,8 +144,8 @@ export const sideCategories = [
       { title: '数码配件', links: ['存储卡', '读卡器', '数码相框', '录音笔', '电子词典'] }
     ]
   },
-  { 
-    id: 2, 
+  {
+    id: 2,
     name: '电脑/办公/外设',
     children: [
       { title: '电脑整机', links: ['笔记本', '游戏本', '台式机', '一体机', '服务器', '工作站'] },
@@ -154,8 +154,8 @@ export const sideCategories = [
       { title: '办公设备', links: ['打印机', '投影仪', '扫描仪', '复印机', '碎纸机', '考勤机'] }
     ]
   },
-  { 
-    id: 3, 
+  {
+    id: 3,
     name: '家用电器',
     children: [
       { title: '大家电', links: ['电视', '空调', '冰箱', '洗衣机', '热水器', '油烟机'] },
@@ -164,8 +164,8 @@ export const sideCategories = [
       { title: '个护健康', links: ['剃须刀', '电吹风', '美容仪', '按摩器', '体重秤', '血压计'] }
     ]
   },
-  { 
-    id: 4, 
+  {
+    id: 4,
     name: '家居/家具/家装',
     children: [
       { title: '家纺', links: ['四件套', '被子', '枕头', '毛巾', '窗帘', '地毯', '凉席'] },
@@ -174,8 +174,8 @@ export const sideCategories = [
       { title: '家装建材', links: ['瓷砖', '地板', '油漆', '壁纸', '五金', '开关插座'] }
     ]
   },
-  { 
-    id: 5, 
+  {
+    id: 5,
     name: '男装/女装/内衣',
     children: [
       { title: '男装', links: ['T恤', '衬衫', '外套', '夹克', '牛仔裤', '休闲裤', '西装'] },
@@ -184,8 +184,8 @@ export const sideCategories = [
       { title: '配饰', links: ['帽子', '围巾', '手套', '腰带', '领带', '太阳镜'] }
     ]
   },
-  { 
-    id: 6, 
+  {
+    id: 6,
     name: '美妆/护肤/个护',
     children: [
       { title: '护肤', links: ['洁面', '化妆水', '乳液', '面霜', '精华', '面膜', '眼霜'] },
@@ -194,8 +194,8 @@ export const sideCategories = [
       { title: '个人护理', links: ['洗发水', '沐浴露', '牙膏', '牙刷', '漱口水', '身体乳'] }
     ]
   },
-  { 
-    id: 7, 
+  {
+    id: 7,
     name: '运动/户外/鞋靴',
     children: [
       { title: '运动鞋', links: ['跑步鞋', '篮球鞋', '足球鞋', '休闲鞋', '板鞋', '帆布鞋'] },
@@ -204,8 +204,8 @@ export const sideCategories = [
       { title: '健身器材', links: ['跑步机', '动感单车', '哑铃', '瑜伽垫', '拉力器', '仰卧板'] }
     ]
   },
-  { 
-    id: 8, 
+  {
+    id: 8,
     name: '食品/生鲜/酒水',
     children: [
       { title: '零食', links: ['坚果', '饼干', '糖果', '巧克力', '蜜饯', '肉干', '膨化食品'] },
@@ -214,8 +214,8 @@ export const sideCategories = [
       { title: '饮料冲调', links: ['牛奶', '咖啡', '茶叶', '果汁', '矿泉水', '功能饮料'] }
     ]
   },
-  { 
-    id: 9, 
+  {
+    id: 9,
     name: '母婴/玩具/童装',
     children: [
       { title: '奶粉辅食', links: ['婴儿奶粉', '儿童奶粉', '米粉', '果泥', '营养品'] },
@@ -224,8 +224,8 @@ export const sideCategories = [
       { title: '童装童鞋', links: ['婴儿服', '儿童T恤', '儿童裤子', '童鞋', '书包'] }
     ]
   },
-  { 
-    id: 10, 
+  {
+    id: 10,
     name: '图书/音像/电子书',
     children: [
       { title: '图书', links: ['小说', '文学', '经管', '教育', '童书', '科技', '艺术'] },

@@ -4,12 +4,14 @@
       <!-- 区块标题 -->
       <div class="section-header">
         <div class="title">
-          <el-icon class="icon"><Star /></el-icon>
+          <el-icon class="icon">
+            <Star />
+          </el-icon>
           <span>为你推荐</span>
         </div>
         <div v-if="tabs.length > 0" class="tabs">
-          <span 
-            v-for="tab in tabs" 
+          <span
+            v-for="tab in tabs"
             :key="tab.id"
             class="tab"
             :class="{ active: activeTab === tab.id }"
@@ -23,11 +25,11 @@
           <el-icon><ArrowRight /></el-icon>
         </a>
       </div>
-      
+
       <!-- 商品列表 -->
       <div v-if="hasProducts" class="product-grid">
-        <ProductCard 
-          v-for="product in displayProducts" 
+        <ProductCard
+          v-for="product in displayProducts"
           :key="product.id"
           :product="product"
           @click="handleProductClick"
@@ -35,23 +37,27 @@
           @collect="handleCollect"
         />
       </div>
-      
+
       <!-- 商品为空时的占位 -->
       <div v-else class="product-empty">
-        <el-icon :size="48"><Star /></el-icon>
+        <el-icon :size="48">
+          <Star />
+        </el-icon>
         <p>暂无商品数据</p>
       </div>
-      
+
       <!-- 加载更多（仅在有更多商品时显示） -->
       <div v-if="hasProducts" class="load-more">
-        <button 
+        <button
           v-if="hasMoreProducts"
-          class="load-btn" 
+          class="load-btn"
           :class="{ loading: isLoading }"
           :disabled="isLoading"
           @click="loadMore"
         >
-          <el-icon v-if="isLoading" class="is-loading"><Loading /></el-icon>
+          <el-icon v-if="isLoading" class="is-loading">
+            <Loading />
+          </el-icon>
           <span>{{ isLoading ? '加载中...' : '查看更多商品' }}</span>
         </button>
         <span v-else class="no-more">已经到底啦~</span>
@@ -120,26 +126,26 @@ const currentProducts = computed(() => {
     hot: hotProducts.value,
     discount: discountProducts.value
   }
-  
+
   const products = productMap[activeTab.value]
-  
+
   // 边界检查
   if (!products || !Array.isArray(products)) {
     logger.warn('当前分类商品数据无效', { tab: activeTab.value })
     return []
   }
-  
+
   return products
 })
 
 // 计算属性：显示的商品（带边界检查）
 const displayProducts = computed(() => {
   const products = currentProducts.value
-  
+
   if (products.length === 0) {
     return []
   }
-  
+
   // 确保 pageSize 不超过实际商品数量
   const safePageSize = Math.min(pageSize.value, products.length)
   return products.slice(0, safePageSize)
@@ -161,7 +167,7 @@ const switchTab = (tabId) => {
     logger.debug('已在当前 Tab', { tab: tabId })
     return
   }
-  
+
   logger.info('切换商品分类', { from: activeTab.value, to: tabId })
   activeTab.value = tabId
   pageSize.value = PRODUCT_CONFIG.initialPageSize  // 重置分页
@@ -172,16 +178,16 @@ const loadMore = () => {
     logger.debug('正在加载中，跳过请求')
     return
   }
-  
+
   if (!hasMoreProducts.value) {
     logger.debug('没有更多商品了')
     return
   }
-  
+
   logger.info('加载更多商品', { currentPageSize: pageSize.value })
   isLoading.value = true
   loadError.value = false
-  
+
   // 模拟加载延迟
   setTimeout(() => {
     try {
@@ -229,7 +235,7 @@ const handleCollect = (product) => {
 .product-recommend {
   padding: $spacing-lg 0;
   background: $bg-primary;
-  
+
   .container {
     max-width: $container-width;
     margin: 0 auto;
@@ -246,24 +252,24 @@ const handleCollect = (product) => {
   background: $color-white;
   border-radius: $radius-lg;
   box-shadow: $shadow-sm;
-  
+
   .title {
     display: flex;
     align-items: center;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
     color: $color-text-primary;
-    
+
     .icon {
       margin-right: $spacing-sm;
       color: $jd-red;
     }
   }
-  
+
   .tabs {
     display: flex;
     margin-left: $spacing-xl;
-    
+
     .tab {
       padding: $spacing-xs $spacing-md;
       font-size: $font-size-sm;
@@ -271,11 +277,11 @@ const handleCollect = (product) => {
       cursor: pointer;
       border-radius: $radius-md;
       transition: all $transition-fast;
-      
+
       &:hover {
         color: $jd-red;
       }
-      
+
       &.active {
         background: rgba($jd-red, 0.1);
         color: $jd-red;
@@ -283,19 +289,19 @@ const handleCollect = (product) => {
       }
     }
   }
-  
+
   .more {
     margin-left: auto;
     display: flex;
     align-items: center;
     font-size: $font-size-sm;
     color: $color-text-secondary;
-    
+
     .el-icon {
       margin-left: 4px;
       font-size: 12px;
     }
-    
+
     &:hover {
       color: $jd-red;
     }
@@ -307,19 +313,19 @@ const handleCollect = (product) => {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: $spacing-md;
-  
+
   @include respond-to(xl) {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   @include respond-to(lg) {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   @include respond-to(md) {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   @include respond-to(sm) {
     grid-template-columns: repeat(2, 1fr);
     gap: $spacing-sm;
@@ -334,12 +340,12 @@ const handleCollect = (product) => {
   background: $color-white;
   border-radius: $radius-lg;
   color: $color-text-placeholder;
-  
+
   .el-icon {
     margin-bottom: $spacing-md;
     color: $border-medium;
   }
-  
+
   p {
     font-size: $font-size-base;
   }
@@ -349,7 +355,7 @@ const handleCollect = (product) => {
 .load-more {
   margin-top: $spacing-lg;
   text-align: center;
-  
+
   .load-btn {
     display: inline-flex;
     align-items: center;
@@ -363,28 +369,28 @@ const handleCollect = (product) => {
     border-radius: $radius-lg;
     cursor: pointer;
     transition: all $transition-fast;
-    
+
     .el-icon {
       margin-right: $spacing-sm;
     }
-    
+
     &:hover:not(.loading):not(:disabled) {
       color: $jd-red;
       border-color: $jd-red;
       background: rgba($jd-red, 0.05);
     }
-    
+
     &.loading,
     &:disabled {
       cursor: not-allowed;
       opacity: 0.7;
-      
+
       .is-loading {
         animation: rotate 1s linear infinite;
       }
     }
   }
-  
+
   .no-more {
     display: inline-block;
     padding: $spacing-md;

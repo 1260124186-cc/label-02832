@@ -9,9 +9,11 @@
               <el-icon><AlarmClock /></el-icon>
               {{ config.title }}
             </h2>
-            <p class="subtitle">{{ config.subtitle }}</p>
+            <p class="subtitle">
+              {{ config.subtitle }}
+            </p>
           </div>
-          
+
           <!-- 倒计时 -->
           <div class="countdown">
             <span class="label">距结束</span>
@@ -23,32 +25,34 @@
               <span class="time-block">{{ countdown.seconds }}</span>
             </div>
           </div>
-          
+
           <a href="javascript:void(0)" class="more-link" @click="handleClick">
             更多秒杀
             <el-icon><ArrowRight /></el-icon>
           </a>
         </div>
-        
+
         <!-- 商品列表 -->
         <div class="flash-products">
-          <div 
-            v-for="product in flashProducts" 
+          <div
+            v-for="product in flashProducts"
             :key="product.id"
             class="flash-item"
           >
             <!-- 图片区域 - 使用懒加载 -->
             <div class="item-image">
-              <img v-lazy-img="product.image" :alt="product.name" class="product-img" />
+              <img v-lazy-img="product.image" :alt="product.name" class="product-img">
             </div>
-            
+
             <!-- 商品信息区域 -->
             <div class="item-info">
               <!-- 折扣标签放在商品名称上方 -->
               <div class="discount-row">
                 <span v-if="product.discount" class="discount-tag">{{ product.discount }}折</span>
               </div>
-              <p class="item-name">{{ product.name }}</p>
+              <p class="item-name">
+                {{ product.name }}
+              </p>
               <div class="item-price">
                 <span class="price-current">
                   <span class="symbol">¥</span>
@@ -56,21 +60,21 @@
                 </span>
                 <span class="price-original">¥{{ product.originalPrice }}</span>
               </div>
-              
+
               <!-- 进度条 -->
               <div class="progress-wrap">
                 <div class="progress-bar">
-                  <div 
-                    class="progress-fill" 
+                  <div
+                    class="progress-fill"
                     :style="{ width: product.progress + '%' }"
-                  ></div>
+                  />
                 </div>
                 <span class="progress-text">
                   {{ product.progress >= 80 ? '即将售罄' : `已抢${product.progress}%` }}
                 </span>
               </div>
-              
-              <button 
+
+              <button
                 class="grab-btn"
                 :class="{ 'sold-out': product.progress >= 100 }"
                 :disabled="product.progress >= 100"
@@ -92,11 +96,11 @@ import { AlarmClock, ArrowRight } from '@element-plus/icons-vue'
 import { showDevelopingToast } from '@/utils/toast'
 
 // 从 mock 数据导入
-import { 
-  flashSaleConfig, 
-  flashSaleProducts, 
+import {
+  flashSaleConfig,
+  flashSaleProducts,
   getFlashSaleRemainingTime,
-  formatCountdown 
+  formatCountdown
 } from '@/mock/flashSale'
 
 const countdown = ref({
@@ -124,16 +128,16 @@ const flashProducts = ref(flashSaleProducts)
 const startCountdown = () => {
   // 从 mock 数据获取剩余时间
   let totalSeconds = getFlashSaleRemainingTime()
-  
+
   // 初始化倒计时显示
   countdown.value = formatCountdown(totalSeconds)
-  
+
   countdownTimer = setInterval(() => {
     if (totalSeconds <= 0) {
       clearInterval(countdownTimer)
       return
     }
-    
+
     totalSeconds--
     countdown.value = formatCountdown(totalSeconds)
   }, 1000)
@@ -154,7 +158,7 @@ onUnmounted(() => {
 .flash-sale {
   padding: $spacing-lg 0;
   background: $bg-primary;
-  
+
   .container {
     max-width: $container-width;
     margin: 0 auto;
@@ -182,10 +186,10 @@ onUnmounted(() => {
   justify-content: center;
   text-align: center;
   color: $color-white;
-  
+
   .title-area {
     margin-bottom: $spacing-lg;
-    
+
     .title {
       display: flex;
       align-items: center;
@@ -193,33 +197,33 @@ onUnmounted(() => {
       font-size: $font-size-xl;
       font-weight: $font-weight-bold;
       margin-bottom: $spacing-xs;
-      
+
       .el-icon {
         margin-right: $spacing-xs;
       }
     }
-    
+
     .subtitle {
       font-size: $font-size-xs;
       opacity: 0.8;
     }
   }
-  
+
   .countdown {
     margin-bottom: $spacing-lg;
-    
+
     .label {
       display: block;
       font-size: $font-size-xs;
       margin-bottom: $spacing-sm;
       opacity: 0.8;
     }
-    
+
     .time-blocks {
       display: flex;
       align-items: center;
       justify-content: center;
-      
+
       .time-block {
         display: inline-flex;
         align-items: center;
@@ -231,14 +235,14 @@ onUnmounted(() => {
         font-size: $font-size-lg;
         font-weight: $font-weight-bold;
       }
-      
+
       .separator {
         margin: 0 4px;
         font-weight: $font-weight-bold;
       }
     }
   }
-  
+
   .more-link {
     display: flex;
     align-items: center;
@@ -248,12 +252,12 @@ onUnmounted(() => {
     color: $color-white;
     font-size: $font-size-sm;
     transition: background $transition-fast;
-    
+
     .el-icon {
       margin-left: 4px;
       font-size: 12px;
     }
-    
+
     &:hover {
       background: rgba(255, 255, 255, 0.3);
     }
@@ -266,7 +270,7 @@ onUnmounted(() => {
   display: flex;
   padding: $spacing-md;
   overflow-x: auto;
-  
+
   &::-webkit-scrollbar {
     height: 6px;
   }
@@ -281,17 +285,17 @@ onUnmounted(() => {
   transition: all $transition-fast;
   background: $color-white;
   border: 1px solid transparent;
-  
+
   &:last-child {
     margin-right: 0;
   }
-  
+
   &:hover {
     background: $bg-primary;
     border-color: $border-light;
     transform: translateY(-2px);
   }
-  
+
   .item-image {
     width: 100%;
     height: 120px;
@@ -302,21 +306,21 @@ onUnmounted(() => {
     background: #f9f9f9;
     border-radius: $radius-md;
     overflow: hidden;
-    
+
     .product-img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
     }
   }
-  
+
   .item-info {
     text-align: center;
-    
+
     .discount-row {
       height: 20px;
       margin-bottom: 4px;
-      
+
       .discount-tag {
         display: inline-block;
         padding: 2px 8px;
@@ -327,7 +331,7 @@ onUnmounted(() => {
         border-radius: $radius-sm;
       }
     }
-    
+
     .item-name {
       font-size: $font-size-sm;
       color: $color-text-primary;
@@ -336,23 +340,23 @@ onUnmounted(() => {
       height: 20px;
       line-height: 20px;
     }
-    
+
     .item-price {
       margin-bottom: $spacing-xs;
-      
+
       .price-current {
         color: $jd-red;
         font-weight: $font-weight-bold;
-        
+
         .symbol {
           font-size: $font-size-xs;
         }
-        
+
         .value {
           font-size: $font-size-lg;
         }
       }
-      
+
       .price-original {
         margin-left: $spacing-xs;
         font-size: $font-size-xs;
@@ -360,17 +364,17 @@ onUnmounted(() => {
         text-decoration: line-through;
       }
     }
-    
+
     .progress-wrap {
       margin-bottom: $spacing-sm;
-      
+
       .progress-bar {
         height: 6px;
         background: #ffe0de;
         border-radius: 3px;
         overflow: hidden;
         margin-bottom: 4px;
-        
+
         .progress-fill {
           height: 100%;
           background: linear-gradient(90deg, $jd-orange, $jd-red);
@@ -378,13 +382,13 @@ onUnmounted(() => {
           transition: width 0.3s ease;
         }
       }
-      
+
       .progress-text {
         font-size: 10px;
         color: $jd-red;
       }
     }
-    
+
     .grab-btn {
       width: 100%;
       padding: $spacing-xs $spacing-sm;
@@ -395,16 +399,16 @@ onUnmounted(() => {
       font-size: $font-size-xs;
       cursor: pointer;
       transition: all $transition-fast;
-      
+
       &:hover:not(:disabled) {
         transform: scale(1.02);
         box-shadow: 0 2px 8px rgba($jd-red, 0.4);
       }
-      
+
       &:active:not(:disabled) {
         transform: scale(0.98);
       }
-      
+
       &.sold-out {
         background: $color-text-placeholder;
         cursor: not-allowed;
